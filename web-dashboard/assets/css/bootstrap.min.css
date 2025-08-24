@@ -1,0 +1,66 @@
+/* Placeholder Bootstrap CSS
+   In a production deployment you would include the full
+   Bootstrap framework here. This file is intentionally left
+   minimal to satisfy the project structure without including
+   large third‑party libraries in the repository. */
+
+body {
+    margin: 0;
+    font-family: sans-serif;
+}
+
+.navbar {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background-color: #343a40;
+    color: white;
+}
+.navbar-brand {
+    margin-right: auto;
+    color: white;
+    text-decoration: none;
+}
+
+.btn {
+    display: inline-block;
+    padding: 0.375rem 0.75rem;
+    border: 1px solid transparent;
+    border-radius: 0.25rem;
+    cursor: pointer;
+}
+.btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    color: #fff;
+}
+.btn-outline-light {
+    background-color: transparent;
+    color: #fff;
+    border-color: #fff;
+}
+
+.container {
+    width: 100%;
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.table {
+    width: 100%;
+    margin-bottom: 1rem;
+    color: #212529;
+    border-collapse: collapse;
+}
+.table th,
+.table td {
+    padding: 0.75rem;
+    vertical-align: top;
+    border-top: 1px solid #dee2e6;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0,0,0,0.05);
+}

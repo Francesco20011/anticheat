@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Login – Anti‑Cheat Dashboard</title>
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/custom.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="d-flex align-items-center" style="min-height:100vh;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-4">
+                <h1 class="h3 mb-3 text-center">Dashboard Login</h1>
+                <form id="loginForm">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Benutzername</label>
+                        <input type="text" class="form-control" id="username" placeholder="admin" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Passwort</label>
+                        <input type="password" class="form-control" id="password" placeholder="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Einloggen</button>
+                    <div id="error" class="text-danger mt-2" style="display:none;"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        fetch('api/auth.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: new URLSearchParams({username, password})
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                localStorage.setItem('token', data.token);
+                window.location = 'index.html';
+            } else {
+                const err = document.getElementById('error');
+                err.textContent = data.message;
+                err.style.display = 'block';
+            }
+        });
+    });
+    </script>
+</body>
+</html>

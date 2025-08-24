@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Anti‑Cheat Dashboard</title>
+    <!-- Core styles -->
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/custom.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Anti‑Cheat Dashboard</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <button id="logoutBtn" class="btn btn-outline-light">Logout</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <h1 class="mb-4">Übersicht</h1>
+        <div id="stats" class="row g-4">
+            <!-- Statistik-Karten werden hier eingefügt -->
+        </div>
+
+        <h2 class="mt-5">Gebannte Spieler</h2>
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered" id="bansTable">
+                <thead>
+                    <tr>
+                        <th>Identifier</th>
+                        <th>Begründung</th>
+                        <th>Gebannt am</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/js/bootstrap.min.js"></script>
+    <script src="assets/js/chart.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script src="script.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Prüfe, ob ein Token vorhanden ist
+        if (!localStorage.getItem('token')) {
+            window.location = 'login.html';
+            return;
+        }
+        // Statistikdaten abrufen
+        fetch('api/stats.php')
+            .then(response => response.json())
+            .then(data => {
+                const statsDiv = document.getElementById('stats');
+                const totalBans = data.totalBans || 0;
+                const totalPlayers = data.totalPlayers || 0;
+                statsDiv.innerHTML = `
+                    <div class="col-md-4">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h5 class="card-title">Gesamtbanns</h5>
+                                <p class="card-text fs-3">${totalBans}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h5 class="card-title">Online Spieler</h5>
+                                <p class="card-text fs-3">${totalPlayers}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        // Banns laden
+        fetch('api/bans.php')
+            .then(res => res.json())
+            .then(data => {
+                const tbody = document.querySelector('#bansTable tbody');
+                tbody.innerHTML = '';
+                Object.keys(data).forEach(id => {
+                    const ban = data[id];
+                    const tr = document.createElement('tr');
+                    const ts = ban.bannedAt ? parseInt(ban.bannedAt) : 0;
+                    tr.innerHTML = `
+                        <td>${id}</td>
+                        <td>${ban.reason}</td>
+                        <td>${new Date(ts * 1000).toLocaleString()}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            });
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            localStorage.removeItem('token');
+            window.location = 'login.html';
+        });
+    });
+    </script>
+</body>
+</html>
