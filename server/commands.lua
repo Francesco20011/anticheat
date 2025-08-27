@@ -23,49 +23,6 @@ local function sendMessage(src, msg)
     end
 end
 
--- Command: ac_unban
--- Removes a ban entry by identifier. Only players with the
--- "anticheat.unban" ACE permission or the server console can run this.
-RegisterCommand('ac_unban', function(src, args)
-    if src ~= 0 and not IsPlayerAceAllowed(src, 'anticheat.unban') then
-        sendMessage(src, 'Non hai il permesso di usare questo comando.')
-        return
-    end
-    local identifier = args[1]
-    if not identifier then
-        sendMessage(src, 'Uso: /ac_unban <identificatore>')
-        return
-    end
-    if ACDB.removeBan(identifier) then
-        sendMessage(src, ('Giocatore %s è stato sbannato.'):format(identifier))
-    else
-        sendMessage(src, ('Non esiste nessun ban per %s.'):format(identifier))
-    end
-end, true)
-
--- Command: ac_bans
--- Lists all current bans. Only players with the "anticheat.view" ACE
--- permission or the server console can run this. Output is JSON
--- encoded for easy reading.
-RegisterCommand('ac_bans', function(src)
-    if src ~= 0 and not IsPlayerAceAllowed(src, 'anticheat.view') then
-        sendMessage(src, 'Non hai il permesso di usare questo comando.')
-        return
-    end
-    local bans = ACDB.getBans()
-    local encoded = json.encode(bans)
-    sendMessage(src, encoded)
-end, true)
-
--- Command: ac_players
--- Lists all currently connected players from the perspective of the
--- anti‑cheat. Useful for debugging.
-RegisterCommand('ac_players', function(src)
-    if src ~= 0 and not IsPlayerAceAllowed(src, 'anticheat.view') then
-        sendMessage(src, 'Non hai il permesso di usare questo comando.')
-        return
-    end
-    local players = ACDB.getPlayers()
-    local encoded = json.encode(players)
-    sendMessage(src, encoded)
-end, true)
+-- Tutti i comandi chat legacy (/ac_unban, /ac_bans, /ac_players) sono stati rimossi
+-- su richiesta. La gestione avviene ora esclusivamente tramite la dashboard UI / eventi.
+-- Manteniamo il file per futura estensione se necessario.

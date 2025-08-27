@@ -67,3 +67,11 @@ RegisterNUICallback('close', function(_, cb)
     SendNUIMessage({ type = 'hide' })
     cb(true)
 end)
+
+-- Aggiungi admin
+RegisterNUICallback('addAdmin', function(data, cb)
+    if data and data.identifier then
+        TriggerServerEvent('anticheat:addAdmin', data.identifier, data.name or '', data.discord or '', data.perms or {})
+    end
+    cb(true)
+end)

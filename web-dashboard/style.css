@@ -3,8 +3,27 @@
    minimal – most styling is provided by Bootstrap. */
 
 body {
-    background-color: #f8f9fa;
+    background-color: #0d1117;
+    color: #cdd6f4;
 }
+
+.navbar, .navbar-dark.bg-dark {
+    background: #111826 !important;
+}
+
+.card.bg-dark {
+    background:#161d2b !important;
+}
+
+.card-title.text-muted { color:#7986a8 !important; }
+
+table.table tbody tr { background:#182230; }
+table.table thead th { background:#131b27; color:#cdd6f4; border-bottom:1px solid #233044; }
+table.table tbody td { color:#cdd6f4; }
+
+.table-striped>tbody>tr:nth-of-type(odd)>* { --bs-table-accent-bg: #141c28; }
+
+canvas#serverChart { width:100% !important; }
 
 .navbar-brand {
     font-weight: bold;

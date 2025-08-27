@@ -33,15 +33,14 @@ AddEventHandler('playerConnecting', function(playerName, setKickReason, deferral
     end
     -- Add the player to the list of current players
     local isAdminPlayer = false
-    -- Determine admin status using the same helper as the ban manager
-    for _, id in ipairs(Config.AdminIdentifiers or {}) do
-        if id == identifier then
-            isAdminPlayer = true
-            break
+    local adminEntry = AC_GetAdminByIdentifier and AC_GetAdminByIdentifier(identifier)
+    if adminEntry then
+        isAdminPlayer = true
+    else
+        for _, id in ipairs(Config.AdminIdentifiers or {}) do
+            if id == identifier then isAdminPlayer = true break end
         end
-    end
-    if not isAdminPlayer then
-        if src ~= 0 and IsPlayerAceAllowed(src, 'anticheat.admin') then
+        if (not isAdminPlayer) and src ~= 0 and IsPlayerAceAllowed(src, 'anticheat.admin') then
             isAdminPlayer = true
         end
     end
@@ -49,7 +48,20 @@ AddEventHandler('playerConnecting', function(playerName, setKickReason, deferral
         name = playerName,
         identifier = identifier,
         joinedAt = os.time(),
-        isAdmin = isAdminPlayer
+    isAdmin = isAdminPlayer,
+    perms = adminEntry and adminEntry.perms or (isAdminPlayer and {'all'} or nil),
+        ip = (function()
+            local addr = ''
+            for _, id in ipairs(GetPlayerIdentifiers(src)) do
+                if id:sub(1,3) == 'ip:' then
+                    addr = id:gsub('ip:','')
+                    break
+                end
+            end
+            -- Se l'identifier è protetto (admin) non memorizziamo IP
+            if isAdminPlayer then return nil end
+            return addr ~= '' and addr or nil
+        end)()
     }
     -- Persist the current players list so external tools can see who is online
     ACDB.updatePlayers(ACPlayers)
@@ -57,6 +69,14 @@ AddEventHandler('playerConnecting', function(playerName, setKickReason, deferral
     -- determine whether the in‑game dashboard may be opened.
     TriggerClientEvent('anticheat:setAdmin', src, isAdminPlayer)
     deferrals.done()
+    -- Broadcast log append: ingresso giocatore
+    TriggerClientEvent('anticheat:logAppend', -1, {
+        time = os.date('!%Y-%m-%dT%H:%M:%SZ'),
+        type = 'player_join',
+        player = playerName,
+        details = 'Connessione',
+        member = identifier
+    })
 end)
 
 -- When a player disconnects remove them from the ACPlayers table
@@ -66,6 +86,15 @@ AddEventHandler('playerDropped', function(reason)
     local src = source
     ACPlayers[tostring(src)] = nil
     ACDB.updatePlayers(ACPlayers)
+    local name = GetPlayerName(src) or 'Sconosciuto'
+    local identifier = ACDB.getIdentifier(src)
+    TriggerClientEvent('anticheat:logAppend', -1, {
+        time = os.date('!%Y-%m-%dT%H:%M:%SZ'),
+        type = 'player_leave',
+        player = name,
+        details = reason or 'Disconnessione',
+        member = identifier
+    })
 end)
 
 -- Respond to NUI data requests from the client. The client sends a

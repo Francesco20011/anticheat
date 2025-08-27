@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="assets/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/css/custom.css">
     <link rel="stylesheet" href="style.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -26,13 +28,56 @@
         </div>
     </nav>
 
-    <div class="container my-5">
-    <h1 class="mb-4">Panoramica</h1>
-        <div id="stats" class="row g-4">
-            <!-- Statistik-Karten werden hier eingefügt -->
+        <div class="container my-5">
+        <h1 class="mb-4">Panoramica</h1>
+                <div id="stats" class="row g-4">
+                        <!-- Karten statistiche base -->
+                </div>
+
+        <h2 class="mt-5">Server‑Analysen</h2>
+        <div class="container my-4 p-0">
+            <div class="row" id="serverStats">
+                <div class="col-sm-3 mb-3">
+                    <div class="card text-center bg-dark border-secondary h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Giocatori attuali</h6>
+                            <p id="currentPlayers" class="display-6 fw-semibold m-0">0 / 0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-3 mb-3">
+                    <div class="card text-center bg-dark border-secondary h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Giocatori bannati</h6>
+                            <p id="bannedPlayers" class="display-6 fw-semibold m-0">0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-3 mb-3">
+                    <div class="card text-center bg-dark border-secondary h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Picco ultime 24h</h6>
+                            <p id="peakPlayers" class="display-6 fw-semibold m-0">0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-3 mb-3">
+                    <div class="card text-center bg-dark border-secondary h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Media ultime 24h</h6>
+                            <p id="avgPlayers" class="display-6 fw-semibold m-0">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card bg-dark border-secondary mb-4">
+                <div class="card-body">
+                    <canvas id="serverChart" height="110"></canvas>
+                </div>
+            </div>
         </div>
 
-    <h2 class="mt-5">Giocatori bannati</h2>
+        <h2 class="mt-5">Giocatori bannati</h2>
         <div class="table-responsive">
             <table class="table table-striped table-bordered" id="bansTable">
                 <thead>
@@ -49,7 +94,7 @@
 
     <!-- Scripts -->
     <script src="assets/js/bootstrap.min.js"></script>
-    <script src="assets/js/chart.js"></script>
+    <!-- Rimosso stub chart.js locale in favore del CDN -->
     <script src="assets/js/main.js"></script>
     <script src="script.js"></script>
     <script>
@@ -59,32 +104,85 @@
             window.location = 'login.html';
             return;
         }
-        // Statistikdaten abrufen
-        fetch('api/stats.php')
-            .then(response => response.json())
-            .then(data => {
-                const statsDiv = document.getElementById('stats');
-                const totalBans = data.totalBans || 0;
-                const totalPlayers = data.totalPlayers || 0;
-                statsDiv.innerHTML = `
-                    <div class="col-md-4">
-                        <div class="card text-center">
-                            <div class="card-body">
-                                <h5 class="card-title">Bans totali</h5>
-                                <p class="card-text fs-3">${totalBans}</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card text-center">
-                            <div class="card-body">
-                                <h5 class="card-title">Giocatori online</h5>
-                                <p class="card-text fs-3">${totalPlayers}</p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
+                // Statistiche snapshot (totali) – card sintetiche aggiuntive
+                function loadSnapshot() {
+                    fetch('api/stats.php')
+                        .then(r=>r.json())
+                        .then(data => {
+                            const statsDiv = document.getElementById('stats');
+                            const totalBans = data.totalBans || 0;
+                            const totalPlayers = data.totalPlayers || 0;
+                            statsDiv.innerHTML = `
+                                <div class="col-md-6">
+                                    <div class="card text-center bg-dark border-secondary">
+                                        <div class="card-body">
+                                            <h5 class="card-title text-muted">Bans totali</h5>
+                                            <p class="card-text fs-2 fw-semibold">${totalBans}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card text-center bg-dark border-secondary">
+                                        <div class="card-body">
+                                            <h5 class="card-title text-muted">Giocatori online (snapshot)</h5>
+                                            <p class="card-text fs-2 fw-semibold">${totalPlayers}</p>
+                                        </div>
+                                    </div>
+                                </div>`;
+                        });
+                }
+                loadSnapshot();
+
+                // Grafico realtime players / bans
+                const ctx = document.getElementById('serverChart').getContext('2d');
+                const chartConfig = {
+                    type: 'line',
+                    data: { labels: [], datasets: [
+                        { label: 'Giocatori', data: [], borderColor: 'rgba(80,143,250,1)', backgroundColor: 'rgba(80,143,250,0.25)', fill: true, tension: 0.35 },
+                        { label: 'Bans', data: [], borderColor: 'rgba(255,99,132,1)', backgroundColor: 'rgba(255,99,132,0.25)', fill: true, tension: 0.35 }
+                    ]},
+                    options: {
+                        responsive: true,
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: { legend: { labels: { color: '#cdd6f4' } } },
+                        scales: {
+                            x: { ticks: { color: '#a6adc8' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                            y: { beginAtZero: true, ticks: { color: '#a6adc8' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                        }
+                    }
+                };
+                let serverChart = null;
+                try { serverChart = new Chart(ctx, chartConfig); } catch(e) { console.error('Chart init error', e); }
+
+                async function updateTemporalStats() {
+                    try {
+                        const res = await fetch('api/server_stats.php');
+                        if (!res.ok) throw new Error('HTTP '+res.status);
+                        const payload = await res.json();
+                        const series = payload.data || [];
+                        // Aggiorna contatori top
+                        document.getElementById('currentPlayers').textContent = `${payload.totalPlayers} / ${payload.maxPlayers || 0}`;
+                        document.getElementById('bannedPlayers').textContent  = payload.totalBans ?? 0;
+                        document.getElementById('peakPlayers').textContent    = payload.peakPlayers ?? 0;
+                        document.getElementById('avgPlayers').textContent     = payload.avgPlayers ? Math.round(payload.avgPlayers) : 0;
+                        if (serverChart) {
+                            serverChart.data.labels = [];
+                            serverChart.data.datasets[0].data = [];
+                            serverChart.data.datasets[1].data = [];
+                            series.forEach(row => {
+                                const label = new Date(row.time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+                                serverChart.data.labels.push(label);
+                                serverChart.data.datasets[0].data.push(row.players || 0);
+                                serverChart.data.datasets[1].data.push(row.bans || 0);
+                            });
+                            serverChart.update();
+                        }
+                    } catch(err) {
+                        console.error('Errore update stats temporali', err);
+                    }
+                }
+                updateTemporalStats();
+                setInterval(updateTemporalStats, 30000);
         // Banns laden
         fetch('api/bans.php')
             .then(res => res.json())

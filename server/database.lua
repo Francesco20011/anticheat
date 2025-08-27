@@ -10,8 +10,10 @@
 ]]
 
 ACDB = ACDB or {}
+---@diagnostic disable: undefined-global
 
 local bans = {}
+local usedBanIds = {}
 local dataPath = 'data/bans.json'
 
 -- Table of recorded violations. Each entry is a table with keys
@@ -43,6 +45,33 @@ local function loadBans()
         end
     else
         bans = {}
+    end
+    -- Normalizza vecchi record (retro‑compatibilità) e costruisce indice banId
+    local changed = false
+    usedBanIds = {}
+    for identifier, ban in pairs(bans) do
+        if type(ban) == 'table' then
+            if not ban.banId then
+                -- genera ID univoco a 6 cifre
+                local id
+                repeat
+                    id = tostring(math.random(100000, 999999))
+                until not usedBanIds[id]
+                ban.banId = id
+                changed = true
+            end
+            usedBanIds[ban.banId] = true
+            -- campi aggiuntivi opzionali
+            ban.reason = ban.reason or 'Violazione'
+            ban.bannedAt = ban.bannedAt or os.time()
+            ban.permanent = (ban.expiresAt == nil)
+        end
+    end
+    if changed then
+        local ok2, raw2 = pcall(function() return json.encode(bans) end)
+        if ok2 and raw2 then
+            SaveResourceFile(GetCurrentResourceName(), dataPath, raw2, #raw2)
+        end
     end
 end
 
@@ -121,12 +150,38 @@ local function saveBans()
 end
 
 -- Add or update a ban. Uses the player's unique identifier as key.
-function ACDB.addBan(identifier, reason)
+-- Aggiunge / aggiorna un ban. Param info opzionale:
+-- info.name, info.bannedBy, info.durationSeconds (nil = permanente), info.evidence
+local function generateUniqueBanId()
+    local id
+    repeat
+        id = tostring(math.random(100000, 999999))
+    until not usedBanIds[id]
+    usedBanIds[id] = true
+    return id
+end
+function ACDB.addBan(identifier, reason, info)
+    info = info or {}
+    local duration = tonumber(info.durationSeconds)
+    local expiresAt = nil
+    if duration and duration > 0 then
+        expiresAt = os.time() + duration
+    end
+    local existing = bans[identifier]
+    local banId = existing and existing.banId or generateUniqueBanId()
     bans[identifier] = {
-        reason = reason,
-        bannedAt = os.time()
+        banId = banId,
+        identifier = identifier,
+        playerName = info.name or (existing and existing.playerName) or 'Sconosciuto',
+        reason = reason or (existing and existing.reason) or 'Violazione',
+        bannedAt = os.time(),
+        bannedBy = info.bannedBy or 'Sistema',
+        evidence = info.evidence, -- stringa / url / nil
+        expiresAt = expiresAt, -- nil = permanente
+        permanent = expiresAt == nil
     }
     saveBans()
+    return banId
 end
 
 -- Remove a ban. Returns true if a ban existed and was removed.
@@ -142,10 +197,14 @@ end
 -- Check if an identifier is banned. Returns true/false and reason.
 function ACDB.isBanned(identifier)
     local ban = bans[identifier]
-    if ban then
-        return true, ban.reason
+    if not ban then return false, nil end
+    -- Auto-expire temporary bans
+    if ban.expiresAt and os.time() >= ban.expiresAt then
+        bans[identifier] = nil
+        saveBans()
+        return false, nil
     end
-    return false, nil
+    return true, ban.reason
 end
 
 -- Return the full ban list table. Useful for administrative tools.
@@ -203,3 +262,30 @@ end
 function ACDB.getPlayers()
     return players
 end
+
+-- Initialise persistence on resource start
+Citizen.CreateThread(function()
+    -- Small delay to ensure json library is ready
+    Citizen.Wait(200)
+    loadBans()
+    loadViolations()
+    loadPlayers()
+    local function count(t) local c=0 for _ in pairs(t) do c=c+1 end return c end
+    print(('[Anti-Cheat] Persistence loaded: %d ban(s), %d violation(s).'):format(count(bans), #violations))
+    -- Periodic purge of expired bans every 5 minutes
+    while true do
+        local now = os.time()
+        local changed = false
+        for id, ban in pairs(bans) do
+            if ban.expiresAt and now >= ban.expiresAt then
+                bans[id] = nil
+                changed = true
+            end
+        end
+        if changed then
+            saveBans()
+            print('[Anti-Cheat] Expired bans purged automatically')
+        end
+        Citizen.Wait(300000) -- 5 minutes
+    end
+end)

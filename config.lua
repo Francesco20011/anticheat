@@ -78,5 +78,5 @@ Config.LicenseKey = 'DRKS-XXXX-XXXX-XXXX'
 Config.LicenseExpiry = '2025-09-26'
 -- Stato server mostrato in dashboard (puoi sovrascriverlo dinamicamente)
 Config.ServerStatus = 'Online'
--- Nome server personalizzato (se vuoi forzare un nome diverso da sv_hostname)
-Config.ServerName = 'EmpireRP'
+-- Nome server personalizzato. Lascia vuoto ("") per usare automaticamente sv_hostname.
+Config.ServerName = ''

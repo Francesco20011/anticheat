@@ -58,6 +58,14 @@ AddEventHandler('anticheat:reportViolation', function(data)
     ACDB.addViolation(identifier, reason)
     -- Notify AI subsystem about the new violation for the player.
     TriggerEvent('anticheat:violationAdded', identifier)
+    -- Broadcast log append (violazione)
+    TriggerClientEvent('anticheat:logAppend', -1, {
+        time = os.date('!%Y-%m-%dT%H:%M:%SZ'),
+        type = 'violazione',
+        player = GetPlayerName(src) or 'Sconosciuto',
+        details = reason,
+        member = identifier
+    })
     -- Skip banning admins; log and return
     if isAdmin(src, identifier) then
         print(('[AC] Admin violation ignored for %s (%s): %s'):format(GetPlayerName(src) or 'unknown', identifier, reason))
@@ -67,4 +75,12 @@ AddEventHandler('anticheat:reportViolation', function(data)
     -- violations have been recorded before banning. Here we ban
     -- immediately on the first violation.
     dropAndBan(src, identifier, reason)
+    -- Broadcast log append (ban)
+    TriggerClientEvent('anticheat:logAppend', -1, {
+        time = os.date('!%Y-%m-%dT%H:%M:%SZ'),
+        type = 'ban',
+        player = GetPlayerName(src) or 'Sconosciuto',
+        details = reason,
+        member = identifier
+    })
 end)
