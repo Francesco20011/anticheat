@@ -48,6 +48,7 @@ server_scripts {
   'server/discord.lua',
   'server/config_runtime.lua',
   'server/admin_utils.lua',
+  'server/admin_permissions.lua',
   'server/admin_events.lua',
   'server/dashboard.lua',
   'server/main.lua',

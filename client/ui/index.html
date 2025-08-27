@@ -18,17 +18,50 @@
     <title>DrakaShield Anti‑Cheat</title>
     <style>
       /* ============= GLOBAL / LAYOUT RESTORE (lost in last merge) ============= */
-      body {
+      /* Reset completo */
+      html, body, #ui-container {
+        width: 100%;
+        height: 100%;
         margin: 0;
-        font-family: "Segoe UI", Arial, sans-serif;
+        padding: 0;
+        overflow: hidden;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        -webkit-overflow-scrolling: touch;
+      }
+      
+      /* Reset del body */
+      body {
+        background: transparent !important;
+        display: block !important;
+      }
+      /* Stile del contenitore principale */
+      #ui-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
         background: radial-gradient(circle at 25% 15%, #101a33 0%, #060b18 60%, #04070f 100%);
         color: #cdd6f4;
-        display: flex;
-        height: 100vh;
-        overflow: hidden;
+        font-family: "Segoe UI", Arial, sans-serif;
         -webkit-font-smoothing: antialiased;
+        overflow: hidden;
+        display: flex;
+        flex-direction: row;
+        overflow: hidden;
       }
       * { box-sizing: border-box; }
+
+      /* Override global font and text color: all text in the UI should be white and use Arial */
+      body, #ui-container, #ui-container * {
+        font-family: Arial, sans-serif !important;
+        /* Default text color white, but do not force !important so inline colors (e.g. status labels) still apply */
+        color: #ffffff;
+      }
       h1,h2,h3,h4 { font-weight: 600; letter-spacing: .5px; }
       a { color: #7aa2f7; text-decoration: none; }
 
@@ -40,14 +73,20 @@
 
       /* Sidebar */
       #sidebar {
+        position: relative;
         width: 250px;
+        min-width: 250px;
+        height: 100vh;
+        overflow-y: auto;
+        z-index: 1000;
         background: linear-gradient(180deg,#0f1424 0%,#0a0f1d 60%,#070b14 100%);
         border-right: 1px solid #1e253f;
         padding: 18px 18px 14px 18px;
         display: flex;
         flex-direction: column;
         gap: 14px;
-        overflow-y: auto;
+        box-sizing: border-box;
+        flex-shrink: 0;
       }
       #sidebar h1 {
         margin: 0 0 4px 0;
@@ -125,11 +164,20 @@
       /* Category / chip active state unify */
       .chip-active, .log-chip.active { box-shadow: 0 0 0 1px #2d4f8d inset; }
 
+      /* Main content area */
       #main {
-        flex: 1;
-        background: #0a0d1e;
-        overflow-y: auto;
+        position: fixed;
+        top: 0;
+        left: 250px;
+        right: 0;
+        bottom: 0;
         padding: 20px;
+        overflow-y: auto;
+        z-index: 900;
+        height: 100vh;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
       }
       .section {
         display: none;
@@ -243,27 +291,6 @@
         position: relative;
         width: 40px;
         height: 20px;
-        display: inline-block;
-      }
-      .toggle input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-      }
-      .slider {
-        position: absolute;
-        cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: #1e253f;
-        transition: .4s;
-        border-radius: 34px;
-      }
-      .slider:before {
-        position: absolute;
-        content: "";
         height: 14px;
         width: 14px;
         left: 3px;
@@ -437,8 +464,62 @@
         font-size: 12px;
       }
     </style>
+    <style>
+      /* Reset completo per FiveM */
+      html, body, #ui-container {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        overflow: hidden !important;
+      }
+      
+      /* Assicura che il body abbia sfondo trasparente */
+      body {
+        background: transparent !important;
+      }
+      
+      /* Stile del container principale */
+      #ui-container {
+        display: flex;
+        flex-direction: column;
+        background: radial-gradient(circle at 25% 15%, #101a33 0%, #060b18 60%, #04070f 100%);
+        color: #cdd6f4;
+        font-family: "Segoe UI", Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      
+      /* Sidebar fissa a sinistra */
+      #sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 250px;
+        background: linear-gradient(180deg,#0f1424 0%,#0a0f1d 60%,#070b14 100%);
+        border-right: 1px solid #1e253f;
+        padding: 18px;
+        overflow-y: auto;
+        z-index: 1000;
+      }
+      
+      /* Contenuto principale */
+      #main {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        z-index: 900;
+        height: 100vh;
+        box-sizing: border-box;
+      }
+    </style>
   </head>
-  <body>
+  <body style="margin: 0; padding: 0; overflow: hidden; position: fixed; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; transform: none !important; background: transparent !important; line-height: normal !important; font-size: 16px !important; display: flex !important; flex-direction: row !important; align-items: stretch !important; box-sizing: border-box !important; min-height: 100vh !important; -webkit-font-smoothing: antialiased !important; -webkit-text-size-adjust: 100% !important; -webkit-overflow-scrolling: touch !important; overscroll-behavior: none !important; touch-action: manipulation !important; -webkit-tap-highlight-color: transparent !important; -webkit-user-select: none !important; user-select: none !important; -webkit-transform: translateZ(0) !important; transform: translateZ(0) !important; will-change: transform !important; contain: strict !important; overflow-anchor: none !important; -webkit-transform-style: preserve-3d !important; transform-style: preserve-3d !important; backface-visibility: hidden !important; -webkit-backface-visibility: hidden !important; -webkit-perspective: 1000px !important; perspective: 1000px !important;">
     <!-- Sidebar -->
     <div id="sidebar">
       <h1>DrakaShield Anti‑Cheat</h1>
@@ -598,6 +679,12 @@
                 <div id="pdOnlineTime" style="margin-bottom:12px;">-</div>
                 <div style="font-size:11px;color:#6e7d99;text-transform:uppercase;letter-spacing:.5px;">Affidabilità</div>
                 <div id="pdReliability" style="display:flex;align-items:center;gap:6px;">-</div>
+                <div style="font-size:11px;color:#6e7d99;text-transform:uppercase;letter-spacing:.5px;">Licenza</div>
+                <div id="pdLicense" style="font-weight:600;margin-bottom:12px;">-</div>
+                <div style="font-size:11px;color:#6e7d99;text-transform:uppercase;letter-spacing:.5px;">Ping</div>
+                <div id="pdPing" style="font-weight:600;margin-bottom:12px;">-</div>
+                <div style="font-size:11px;color:#6e7d99;text-transform:uppercase;letter-spacing:.5px;">Entrato</div>
+                <div id="pdJoined" style="margin-bottom:12px;">-</div>
               </div>
             </div>
             <div style="background:#0a1020;border:1px solid #1e253f;border-radius:10px;padding:14px 16px;margin-bottom:22px;">
@@ -964,6 +1051,76 @@
       // ----------------------
       // Stato dinamico del server
       // ----------------------
+      
+      // Funzione per aggiornare i dati ricevuti dal server
+      function updateServerData(data) {
+        if (!data) return;
+        
+        // Aggiorna i dati del server
+        if (data.players) serverData.players = data.players;
+        if (data.bans) serverData.bans = data.bans;
+        if (data.violations) serverData.violations = data.violations;
+        if (data.aiDetections) serverData.aiDetections = data.aiDetections;
+        if (data.playersOnline !== undefined) serverData.playersOnline = data.playersOnline;
+        if (data.threatsBlocked !== undefined) serverData.threatsBlocked = data.threatsBlocked;
+        
+        // Aggiorna la UI
+        updateDashboard();
+        renderPlayers();
+      }
+      
+      // Ascolta gli eventi NUI dal client Lua
+      window.addEventListener('message', (event) => {
+        const data = event.data;
+        
+        if (data.type === 'UPDATE_DATA') {
+          updateServerData(data.payload);
+        }
+      });
+      
+      // Gestione della visibilità dell'interfaccia
+      function setUIVisibility(visible) {
+        const uiContainer = document.getElementById('ui-container');
+        if (!uiContainer) return;
+        
+        if (visible) {
+          // show as flex to honor layout; do not rely on block which breaks flex children
+          uiContainer.style.display = 'flex';
+          // Richiedi i dati al server
+          fetch(`https://${GetParentResourceName()}/requestData`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+          });
+        } else {
+          uiContainer.style.display = 'none';
+        }
+      }
+      
+      // Inizializza l'applicazione
+      document.addEventListener('DOMContentLoaded', () => {
+        // Ascolta i messaggi dal client Lua
+        window.addEventListener('message', (event) => {
+          const data = event.data;
+          
+          if (data.type === 'SET_VISIBILITY') {
+            setUIVisibility(data.visible);
+          } else if (data.type === 'UPDATE_DATA') {
+            updateServerData(data.payload);
+          }
+        });
+        
+        // Chiudi l'UI con ESC
+        document.addEventListener('keyup', (e) => {
+          if (e.key === 'Escape' && document.getElementById('ui-container').style.display === 'block') {
+            fetch(`https://${GetParentResourceName()}/closeUI`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({})
+            });
+          }
+        });
+      });
       // serverData conterrà i dati ricevuti dal server tramite evento NUI o callback.
       // All properties will be overwritten when data arrives from Lua. Fields are
       // initialised empty to avoid undefined checks throughout the UI logic.
@@ -1477,12 +1634,109 @@
         if (ipEl) {
           if (p.ipHidden) ipEl.innerHTML = '<span style="color:#e0af68;">Nascosto (staff)</span>'; else ipEl.textContent = p.ip || '-';
         }
-        modal.style.display = 'flex';
+        // Aggiorna licenza, ping e data di ingresso
+        const licEl = document.getElementById('pdLicense'); if (licEl) licEl.textContent = p.license || '-';
+        const pingEl = document.getElementById('pdPing'); if (pingEl) pingEl.textContent = ((p.ping||0) + ' ms');
+        const joinedEl = document.getElementById('pdJoined');
+        if (joinedEl) {
+          if (p.joinedAt) {
+            try {
+              const date = new Date(Number(p.joinedAt) * 1000);
+              const locale = navigator.language || 'it-IT';
+              joinedEl.textContent = date.toLocaleDateString(locale) + ' ' + date.toLocaleTimeString(locale);
+            } catch (e) {
+              joinedEl.textContent = '-';
+            }
+          } else {
+            joinedEl.textContent = '-';
+          }
+        }
+        showModal('playerDetailModal');
       }
-      function hideModal(id){ const m=document.getElementById(id); if(m) m.style.display='none'; }
-      document.addEventListener('click', (e)=>{
+      function hideModal(id) {
+        const el = document.getElementById(id);
+        if (el) {
+          // Start fade out animation
+          el.classList.remove('modal-visible');
+          
+          // Wait for animation to complete before hiding
+          setTimeout(() => {
+            el.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            
+            // Remove any active states from modal triggers
+            const triggers = document.querySelectorAll(`[data-modal="${id}"]`);
+            triggers.forEach(trigger => trigger.classList.remove('active'));
+          }, 200);
+          
+          return true;
+        }
+        return false;
+      }
+
+      function showModal(id) {
+        // First hide any other open modals
+        document.querySelectorAll('.modal-overlay').forEach(modal => {
+          if (modal.id !== id && (modal.style.display === 'flex' || modal.classList.contains('modal-visible'))) {
+            hideModal(modal.id);
+          }
+        });
+        
+        const el = document.getElementById(id);
+        if (el) {
+          // Set display to flex to ensure proper centering
+          el.style.display = 'flex';
+          el.classList.add('modal-visible');
+          document.body.style.overflow = 'hidden';
+          
+          // Set focus to the first focusable element in the modal
+          const focusable = el.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+          if (focusable) focusable.focus();
+          
+          // Add active state to the trigger
+          const trigger = document.querySelector(`[data-modal="${id}"]`);
+          if (trigger) trigger.classList.add('active');
+          
+          return true;
+        }
+        return false;
+      }
+      // Handle ESC key to close modals or UI
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' || e.key === 'Esc') {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          // Close any open modal first
+          const openModal = document.querySelector('.modal-overlay[style*="display: flex"], .modal-overlay[style*="display:flex"]');
+          if (openModal) {
+            const modalId = openModal.id;
+            hideModal(modalId);
+          } else {
+            // If no modal is open, close the UI
+            fetch(`https://${GetParentResourceName()}/close`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' }
+            }).catch(console.error);
+          }
+        }
+      });
+
+      // Close modal when clicking outside content
+      document.addEventListener('click', (e) => {
         const closeAttr = e.target.getAttribute && e.target.getAttribute('data-close');
-        if(closeAttr){ hideModal(closeAttr); }
+        if (closeAttr) {
+          hideModal(closeAttr);
+          return;
+        }
+        
+        // Close modal when clicking on the overlay (outside modal content)
+        if (e.target.classList.contains('modal-overlay')) {
+          const modal = e.target.closest('.modal-overlay');
+          if (modal) {
+            hideModal(modal.id);
+          }
+        }
       });
       document.getElementById('closePlayerDetail').addEventListener('click', ()=> hideModal('playerDetailModal'));
       document.getElementById('pdOpenSearch').addEventListener('click', ()=> {
@@ -1519,13 +1773,73 @@
         document.getElementById('screenshotFeedback').textContent='Richiesta screenshot inviata...'; setTimeout(()=> hideModal('screenshotModal'),900);
       });
       // Spectate Modal
-      function openSpectateModal(){ const m=document.getElementById('spectateModal'); if(!m)return; document.getElementById('spectateTitle').textContent='Osserva - '+(currentDetailPlayer.name||''); m.style.display='flex'; spectateStart(); }
-      function spectateStart(){ if(!currentDetailPlayer)return; fetch(`https://${GetParentResourceName()}/spectatePlayer`, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:currentDetailPlayer.id,disableHud:document.getElementById('spectateHudToggle').checked})}); document.getElementById('spectateFeedback').textContent='Modalità osservazione avviata (in gioco)'; }
-      function spectateStop(){ fetch(`https://${GetParentResourceName()}/spectateStop`, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})}); document.getElementById('spectateFeedback').textContent='Osservazione terminata'; }
-      document.getElementById('spectateStop').addEventListener('click', ()=> { spectateStop(); hideModal('spectateModal'); });
-      document.getElementById('spectateShot').addEventListener('click', ()=> { if(!currentDetailPlayer)return; fetch(`https://${GetParentResourceName()}/screenshotPlayer`, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:currentDetailPlayer.id,tag:'spectate'})}); });
-      document.getElementById('spectateClose').addEventListener('click', ()=> { spectateStop(); });
-      document.getElementById('spectateHudToggle').addEventListener('change', ()=> { /* opzionale: inviare aggiornamento */ });
+      function openSpectateModal() { 
+        const m = document.getElementById('spectateModal'); 
+        if (!m) return; 
+        document.getElementById('spectateTitle').textContent = 'Osserva - ' + (currentDetailPlayer.name || ''); 
+        m.style.display = 'flex'; 
+        spectateStart(); 
+      }
+      
+      function spectateStart() { 
+        if (!currentDetailPlayer) return; 
+        fetch(`https://${GetParentResourceName()}/spectatePlayer`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            id: currentDetailPlayer.id,
+            disableHud: document.getElementById('spectateHudToggle').checked
+          })
+        }); 
+        document.getElementById('spectateFeedback').textContent = 'Modalità osservazione avviata (in gioco)'; 
+      }
+      
+      function spectateStop() { 
+        fetch(`https://${GetParentResourceName()}/spectateStop`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({})
+        }); 
+        document.getElementById('spectateFeedback').textContent = 'Osservazione terminata'; 
+      }
+      
+      // Initialize event listeners for spectate modal
+      document.addEventListener('DOMContentLoaded', () => {
+        const spectateStopBtn = document.getElementById('spectateStop');
+        const spectateShotBtn = document.getElementById('spectateShot');
+        const spectateCloseBtn = document.getElementById('spectateClose');
+        const spectateHudToggle = document.getElementById('spectateHudToggle');
+        
+        if (spectateStopBtn) {
+          spectateStopBtn.addEventListener('click', () => { 
+            spectateStop(); 
+            hideModal('spectateModal'); 
+          });
+        }
+        
+        if (spectateShotBtn) {
+          spectateShotBtn.addEventListener('click', () => { 
+            if (!currentDetailPlayer) return; 
+            fetch(`https://${GetParentResourceName()}/screenshotPlayer`, {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({id: currentDetailPlayer.id, tag: 'spectate'})
+            }); 
+          });
+        }
+        
+        if (spectateCloseBtn) {
+          spectateCloseBtn.addEventListener('click', () => { 
+            spectateStop(); 
+          });
+        }
+        
+        if (spectateHudToggle) {
+          spectateHudToggle.addEventListener('change', () => { 
+            // Optional: Send HUD toggle update
+          });
+        }
+      });
 
       const PERMISSION_DEFS = [
         {key:'all', label:'Tutte le autorizzazioni'},
@@ -1582,7 +1896,24 @@
       }
       function openAddAdmin(){ buildAddAdminModal(); document.getElementById('addAdminModal').style.display='flex'; }
       function closeAddAdmin(){ document.getElementById('addAdminModal').style.display='none'; }
-          const bannedAt = (b.bannedAt ? new Date(b.bannedAt*1000) : (b.created_at ? new Date(b.created_at) : new Date()));
+      
+      // Funzione per il rendering della lista dei ban
+      function renderBanList() {
+          const tbody = document.querySelector('#bansTable tbody');
+          if (!tbody) return;
+          
+          tbody.innerHTML = '';
+          const filtered = (serverData.bans || []).filter(b => {
+              // Filtra i ban in base ai criteri di ricerca
+              return true; // Aggiungi qui la logica di filtraggio se necessaria
+          });
+          
+          filtered.forEach(b => {
+              const tr = document.createElement('tr');
+              const banId = b.banId || b.id || 'N/A';
+              const playerName = b.name || 'Sconosciuto';
+              const reason = b.reason || 'Nessun motivo specificato';
+              const bannedAt = (b.bannedAt ? new Date(b.bannedAt*1000) : (b.created_at ? new Date(b.created_at) : new Date()));
           const bannedBy = b.bannedBy || b.banned_by || 'Sistema';
           const expiresAt = (b.expiresAt ? new Date(b.expiresAt*1000) : null);
           const permanent = b.permanent === true || !expiresAt;
@@ -1613,17 +1944,111 @@
             </td>`;
           tbody.appendChild(tr);
         });
-        if (counter) counter.textContent = filtered.length+` ban trovati`;
-        if (!filtered.length) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#7986a8;">Nessun ban trovato</td></tr>';
-        // azioni
-        tbody.querySelectorAll('.banUnban').forEach(btn=>{
-          btn.addEventListener('click',()=>{
-            fetch(`https://${GetParentResourceName()}/unbanPlayer`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({identifier:btn.dataset.identifier})});
+        
+        // Aggiorna il contatore
+        const counter = document.querySelector('#bansTable + .table-footer .counter');
+        if (counter) counter.textContent = filtered.length + (filtered.length === 1 ? ' ban trovato' : ' ban trovati');
+        
+        // Mostra messaggio se non ci sono ban
+        if (!filtered.length) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#7986a8;padding:20px 0;">Nessun ban trovato</td></tr>';
+        
+        // Aggiungi gestori eventi per i pulsanti
+        tbody.querySelectorAll('.banUnban').forEach(btn => {
+          btn.addEventListener('click', () => {
+            if (confirm('Sei sicuro di voler rimuovere questo ban?')) {
+              fetch(`https://${GetParentResourceName()}/unbanPlayer`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ identifier: btn.dataset.identifier })
+              }).then(() => {
+                // Ricarica la lista dei ban dopo la rimozione
+                renderBanList();
+              });
+            }
           });
         });
-        tbody.querySelectorAll('.banView').forEach(btn=>{
-          btn.addEventListener('click',()=>openBanDetail(btn.dataset.identifier));
+        
+        tbody.querySelectorAll('.banView').forEach(btn => {
+          btn.addEventListener('click', () => openBanDetail(btn.dataset.identifier));
         });
+        
+        // Aggiungi gestore per le evidenze
+        tbody.querySelectorAll('.evidence').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const evidence = decodeURIComponent(btn.dataset.evidence);
+            // Implementa la logica per mostrare l'evidenza
+            console.log('Mostra evidenza:', evidence);
+          });
+        });
+      } // Fine di renderBanList
+      
+      // Alias per compatibilità con il codice esistente
+      const renderBans = renderBanList;
+      
+      // Popola la dashboard con i dati
+      function updateDashboard() {
+        try {
+          // Aggiorna il contatore dei giocatori online
+          const players = serverData.players || [];
+          document.getElementById('onlinePlayers').textContent = players.length;
+          
+          // Aggiorna il contatore dei ban totali
+          const bans = serverData.bans || [];
+          const totalBans = Array.isArray(bans) ? bans.length : Object.keys(bans).length;
+          document.getElementById('totalBans').textContent = totalBans;
+          
+          // Aggiorna l'elenco dei giocatori recenti
+          const recentPlayersList = document.getElementById('recentPlayers');
+          if (recentPlayersList) {
+            recentPlayersList.innerHTML = '';
+            const recentPlayers = players.slice(0, 5); // Mostra solo i primi 5 giocatori
+            
+            recentPlayers.forEach(player => {
+              const playerItem = document.createElement('div');
+              playerItem.className = 'player-item';
+              playerItem.innerHTML = `
+                <div class="player-name">${player.name || 'Sconosciuto'}</div>
+                <div class="player-id">ID: ${player.source || 'N/A'}</div>
+                <div class="player-ping">Ping: ${player.ping || 0}ms</div>
+              `;
+              recentPlayersList.appendChild(playerItem);
+            });
+          }
+          
+          console.log('Dashboard aggiornata con successo');
+        } catch (error) {
+          console.error('Errore durante l\'aggiornamento della dashboard:', error);
+        }
+      }
+      
+      // Inizializza la dashboard
+      function initDashboard() {
+        try {
+          // Assicurati che la tabella esista
+          const bansTable = document.getElementById('bansTable');
+          if (bansTable) {
+            // Forza il rendering iniziale della tabella
+            renderBanList();
+          }
+          
+          // Aggiorna i dati della dashboard
+          updateDashboard();
+          
+          // Mostra la dashboard di default
+          showSection('dashboard');
+          
+          console.log('Dashboard inizializzata correttamente');
+        } catch (error) {
+          console.error('Errore durante l\'inizializzazione della dashboard:', error);
+        }
+      }
+      
+      // Esegui l'inizializzazione quando il DOM è pronto
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initDashboard);
+      } else {
+        initDashboard();
       }
 
       function openBanDetail(identifier){
@@ -2101,8 +2526,11 @@
       
 
       // Nasconde l'interfaccia finché non vengono ricevuti dati dal lato client.
-      document.addEventListener('DOMContentLoaded', function() {
-        document.body.style.display = 'none';
+        document.addEventListener('DOMContentLoaded', function() {
+        // Hide the UI container until we explicitly show it.  Do not hide the body,
+        // otherwise the background gradient disappears.
+        var uiCont = document.getElementById('ui-container');
+        if (uiCont) uiCont.style.display = 'none';
       });
 
       // Aggiorna i valori delle carte del dashboard usando serverData.
@@ -2167,7 +2595,10 @@
         if (data.type === 'show') {
           if (!data.data) { // apertura esplicita
             dashVisible = true;
-            document.body.style.display = 'flex';
+            // Show the UI container instead of the body so that the background
+            // gradient remains visible and the rest of the page remains untouched.
+            var uiCont = document.getElementById('ui-container');
+            if (uiCont) uiCont.style.display = 'flex';
             applyDynamicCards();
             updatePermissionVisibility();
             return;
@@ -2224,9 +2655,72 @@
           }
           // Multi stream
           renderMulti();
-        } else if (data.type === 'hide') {
+        }
+        else if (data.type === 'updateData') {
+          // Receive incremental updates from the Lua client. Treat similarly
+          // to a `show` message that carries data. Only process if the dashboard
+          // is currently visible.
+          if (!dashVisible) return;
+          // Some implementations send the payload in the `data` property, others in
+          // `payload`; handle both.
+          var incoming = data.data || data.payload;
+          if (incoming) {
+            serverData = incoming;
+            applyDynamicCards();
+            updatePermissionVisibility();
+            // Recompute logs and console arrays based on violations and AI detections
+            logs = [];
+            consoleLogs = [];
+            if (serverData.violations) {
+              serverData.violations.forEach(function(v) {
+                logs.push({
+                  time: v.created_at || v.time || new Date().toISOString(),
+                  type: v.violation_type || 'violazione',
+                  player: v.player_name || v.player || '-',
+                  details: v.description || v.violation_type || '-',
+                  member: v.identifier || '-'
+                });
+                var t = new Date(v.created_at || Date.now());
+                var ts = t.toTimeString().substring(0,8);
+                consoleLogs.push('[' + ts + '] VIOLAZIONE - ' + (v.player_name || '-') + ': ' + (v.violation_type || ''));
+              });
+            }
+            if (serverData.aiDetections) {
+              serverData.aiDetections.forEach(function(d) {
+                logs.push({
+                  time: d.created_at || d.time || new Date().toISOString(),
+                  type: 'ai_detection',
+                  player: d.player_name || '-',
+                  details: d.threat_type || d.detection_data || '-',
+                  member: d.identifier || '-'
+                });
+                var t = new Date(d.created_at || Date.now());
+                var ts = t.toTimeString().substring(0,8);
+                consoleLogs.push('[' + ts + '] AI - ' + (d.player_name || '-') + ': ' + (d.threat_type || ''));
+              });
+            }
+            // Update cards and sections
+            updateDashboardCards();
+            renderPlayers();
+            renderBans();
+            renderAdmins();
+            renderLogs();
+            renderConsole();
+            renderSearch();
+            renderAnalysis();
+            var activeTabBtn = document.querySelector('.config-tabs button.active');
+            if (activeTabBtn) {
+              renderConfigCategory(activeTabBtn.getAttribute('data-tab'));
+            }
+            renderMulti();
+          }
+        }
+        else if (data.type === 'hide') {
           dashVisible = false;
-          document.body.style.display = 'none';
+          // Hide only the UI container; leaving body intact ensures the game
+          // continues rendering correctly behind the overlay.
+          var uiCont = document.getElementById('ui-container');
+          if (uiCont) uiCont.style.display = 'none';
         }
         else if (data.type === 'logAppend') {
           // Append singolo log dinamico

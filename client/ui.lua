@@ -8,58 +8,196 @@ local isSpectating = false
 local spectateTarget = nil
 local spectateLastCoords = nil
 local spectateDisableHud = true
+local isNuiFocused = false
 
+-- Vehicle removal handler for unauthorized admin actions
+RegisterNetEvent('anticheat:removeVehicle')
+AddEventHandler('anticheat:removeVehicle', function(plate)
+    local playerPed = PlayerPedId()
+    local vehicle = GetVehiclePedIsIn(playerPed, false)
+    
+    if DoesEntityExist(vehicle) then
+        local vehiclePlate = GetVehicleNumberPlateText(vehicle)
+        if vehiclePlate == plate then
+            -- Save player's last position before removing the vehicle
+            local lastCoords = GetEntityCoords(playerPed)
+            
+            -- Delete the vehicle
+            ESX.Game.DeleteVehicle(vehicle)
+            
+            -- Teleport player to the ground to prevent falling through the map
+            local groundFound, groundZ = GetGroundZFor_3dCoord(lastCoords.x, lastCoords.y, lastCoords.z + 10.0, true)
+            if groundFound then
+                SetEntityCoords(playerPed, lastCoords.x, lastCoords.y, groundZ, false, false, false, false)
+            else
+                SetEntityCoords(playerPed, lastCoords.x, lastCoords.y, lastCoords.z, false, false, false, false)
+            end
+            
+            -- Notify the player
+            ESX.ShowNotification('~r~Veicolo rimosso: accesso non autorizzato')
+            
+            -- Log the action
+            print(('[ANTI-ABUSE] Removed unauthorized vehicle with plate: %s'):format(plate))
+        end
+    end
+end)
+
+-- Initialize UI in hidden state
 Citizen.CreateThread(function()
     Citizen.Wait(1000)
-    SendNUIMessage({ type = 'hide' })
+    -- Invia lo stato iniziale all'UI
+    SendNUIMessage({ 
+        type = 'SET_VISIBILITY',
+        visible = false
+    })
     SetNuiFocus(false, false)
+    isNuiFocused = false
+    uiOpen = false
 end)
 
 -- I comandi manuali /acshow e /achide sono stati rimossi: l'apertura avviene solo con il tasto F9.
 
+-- Toggle UI with F9
 RegisterCommand('anticheat_toggleui', function()
+    if not isAdmin then 
+        ESX.ShowNotification('~r~Accesso negato: non hai i permessi necessari')
+        return 
+    end
+    
     uiOpen = not uiOpen
     
     if uiOpen then
+        -- Mostra l'UI prima di richiedere i dati per evitare ritardi
+        SendNUIMessage({
+            type = 'SET_VISIBILITY',
+            visible = true
+        })
+        
+        -- Mostra il cursore e imposta il focus NUI
         SetNuiFocus(true, true)
-        SendNUIMessage({ type = 'show' })
+        SetNuiFocusKeepInput(true)
+        isNuiFocused = true
+        uiOpen = true
+        
+        -- Disabilita i controlli del giocatore
+        Citizen.CreateThread(function()
+            while uiOpen do
+                DisableControlAction(0, 24, true)  -- Disable attack
+                DisableControlAction(0, 25, true)  -- Disable aim
+                DisableControlAction(0, 1, true)   -- Disable pan
+                DisableControlAction(0, 2, true)   -- Disable tilt
+                DisableControlAction(0, 263, true) -- Disable melee
+                DisableControlAction(0, 264, true) -- Disable melee
+                DisableControlAction(0, 257, true) -- Disable melee
+                Citizen.Wait(0)
+            end
+        end)
+        
+        -- Richiedi i dati al server dopo aver mostrato l'UI
+        TriggerServerEvent('anticheat:requestDashboardData')
+        
+        -- Log action
+        print('[ANTICHEAT] UI opened by admin')
     else
-        SetNuiFocus(false, false)
+        -- Nascondi l'UI
         SendNUIMessage({ type = 'hide' })
+        
+        -- Ripristina i controlli del giocatore
+        SetNuiFocus(false, false)
+        SetNuiFocusKeepInput(false)
+        isNuiFocused = false
+        uiOpen = false
+        
+        -- Forza il rilascio di tutti i controlli
+        Citizen.Wait(0)
+        EnableAllControlActions(0)
+        
+        -- Add debug print
+        print('^2[ANTICHEAT]^7 UI closed')
     end
 end, false)
 RegisterKeyMapping('anticheat_toggleui', 'Apri la dashboard Anti‑Cheat', 'keyboard', 'F9')
 
+-- Handle ESC key to close UI
 Citizen.CreateThread(function()
     while true do
         Citizen.Wait(0)
-        if uiOpen and IsControlJustPressed(0, 322) then
+        
+        -- Close UI when ESC is pressed and UI is open
+        if IsControlJustReleased(0, 322) and uiOpen then -- 322 is ESC key
             uiOpen = false
+            isNuiFocused = false
+            SetNuiFocus(false, false)
+            SendNUIMessage({ type = 'hide' })
+            EnableAllControlActions(0)
+            print('^2[ANTICHEAT]^7 UI closed by ESC key')
+            Citizen.Wait(200) -- Aumentato il delay per prevenire riaperture accidentali
+        end
+    end
+end)
+
+-- Close UI when resource stops
+AddEventHandler('onResourceStop', function(resourceName)
+    if resourceName == GetCurrentResourceName() then
+        if uiOpen then
             SetNuiFocus(false, false)
             SendNUIMessage({ type = 'hide' })
         end
     end
 end)
 
+-- Handle close request from NUI
+RegisterNUICallback('closeUI', function(data, cb)
+    uiOpen = false
+    isNuiFocused = false
+    SetNuiFocus(false, false)
+    SendNUIMessage({ type = 'hide' })
+    if cb then cb('ok') end
+end)
+
+-- Handle data requests from NUI
 RegisterNUICallback('requestData', function(data, cb)
-    if uiData then
+    -- If we have cached data and it's recent (less than 5 seconds old), use it
+    if uiData and (GetGameTimer() - (uiData.timestamp or 0) < 5000) then
         cb(uiData)
     else
+        -- Otherwise, request fresh data
         pendingNuiCallbacks[#pendingNuiCallbacks + 1] = cb
         TriggerServerEvent('anticheat:requestDashboardData')
     end
 end)
 
-RegisterNetEvent('anticheat:receiveDashboardData')
-AddEventHandler('anticheat:receiveDashboardData', function(data)
+-- Handle updated dashboard data from server
+RegisterNetEvent('anticheat:updateDashboardData')
+AddEventHandler('anticheat:updateDashboardData', function(data)
+    -- Aggiungi timestamp e informazioni aggiuntive
+    data.timestamp = GetGameTimer()
+    
+    -- Assicurati che i dati del server siano sempre disponibili
+    if not data.serverInfo then data.serverInfo = {} end
+    data.serverInfo.status = 'Online'
+    data.serverInfo.ip = GetConvar('sv_hostname', '127.0.0.1')
+    data.serverInfo.license = GetConvar('sv_licenseKey', 'N/A')
+    
+    -- Aggiorna i dati
     uiData = data
     
-    for _, callback in ipairs(pendingNuiCallbacks) do
-        callback(data)
+    -- Invia l'aggiornamento all'NUI se l'UI è aperta
+    if uiOpen then
+        SendNUIMessage({
+            type = 'updateData',
+            data = uiData
+        })
+    end
+    
+    -- Chiama le callback in attesa
+    for _, cb in ipairs(pendingNuiCallbacks) do
+        cb(uiData)
     end
     pendingNuiCallbacks = {}
     
-    Citizen.SetTimeout(5000, function() cachedDashboardData = nil end)
+    -- Log di debug
+    print('[ANTICHEAT] Dati dashboard aggiornati')
 end)
 
 -- Aggiornamenti push periodici
