@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="it">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Anti‑Cheat Dashboard</title>
+    <title>Dashboard Anti‑Cheat</title>
     <!-- Core styles -->
     <link rel="stylesheet" href="assets/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/css/custom.css">
@@ -12,14 +12,14 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">Anti‑Cheat Dashboard</a>
+            <a class="navbar-brand" href="#">Dashboard Anti‑Cheat</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <button id="logoutBtn" class="btn btn-outline-light">Logout</button>
+                        <button id="logoutBtn" class="btn btn-outline-light">Esci</button>
                     </li>
                 </ul>
             </div>
@@ -27,19 +27,19 @@
     </nav>
 
     <div class="container my-5">
-        <h1 class="mb-4">Übersicht</h1>
+    <h1 class="mb-4">Panoramica</h1>
         <div id="stats" class="row g-4">
             <!-- Statistik-Karten werden hier eingefügt -->
         </div>
 
-        <h2 class="mt-5">Gebannte Spieler</h2>
+    <h2 class="mt-5">Giocatori bannati</h2>
         <div class="table-responsive">
             <table class="table table-striped table-bordered" id="bansTable">
                 <thead>
                     <tr>
-                        <th>Identifier</th>
-                        <th>Begründung</th>
-                        <th>Gebannt am</th>
+                        <th>Identificatore</th>
+                        <th>Motivo</th>
+                        <th>Data ban</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -70,7 +70,7 @@
                     <div class="col-md-4">
                         <div class="card text-center">
                             <div class="card-body">
-                                <h5 class="card-title">Gesamtbanns</h5>
+                                <h5 class="card-title">Bans totali</h5>
                                 <p class="card-text fs-3">${totalBans}</p>
                             </div>
                         </div>
@@ -78,7 +78,7 @@
                     <div class="col-md-4">
                         <div class="card text-center">
                             <div class="card-body">
-                                <h5 class="card-title">Online Spieler</h5>
+                                <h5 class="card-title">Giocatori online</h5>
                                 <p class="card-text fs-3">${totalPlayers}</p>
                             </div>
                         </div>

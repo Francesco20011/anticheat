@@ -2,6 +2,7 @@ local uiOpen = false
 local pendingNuiCallbacks = {}
 local isAdmin = false
 local cachedDashboardData = nil
+local uiData = nil
 
 Citizen.CreateThread(function()
     Citizen.Wait(1000)
@@ -46,8 +47,8 @@ Citizen.CreateThread(function()
 end)
 
 RegisterNUICallback('requestData', function(data, cb)
-    if cachedDashboardData then
-        cb(cachedDashboardData)
+    if uiData then
+        cb(uiData)
     else
         pendingNuiCallbacks[#pendingNuiCallbacks + 1] = cb
         TriggerServerEvent('anticheat:requestDashboardData')
@@ -56,16 +57,24 @@ end)
 
 RegisterNetEvent('anticheat:receiveDashboardData')
 AddEventHandler('anticheat:receiveDashboardData', function(data)
-    cachedDashboardData = data
+    uiData = data
     
     for _, callback in ipairs(pendingNuiCallbacks) do
         callback(data)
     end
     pendingNuiCallbacks = {}
     
-    Citizen.SetTimeout(5000, function()
-        cachedDashboardData = nil
-    end)
+    Citizen.SetTimeout(5000, function() cachedDashboardData = nil end)
+end)
+
+-- Aggiornamenti push periodici
+RegisterNetEvent('anticheat:pushDashboardUpdate')
+AddEventHandler('anticheat:pushDashboardUpdate', function(payload)
+    if not uiOpen then return end
+    if payload and payload.data then
+        uiData = payload.data
+        SendNUIMessage({ type = 'show', data = uiData })
+    end
 end)
 
 RegisterNUICallback('close', function(data, cb)

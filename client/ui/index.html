@@ -1,431 +1,1408 @@
 <!DOCTYPE html>
-<html lang="de">
-<head>
-  <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Anti‑Cheat Panel</title>
-  <style>
-    /* Base styles for full‑screen overlay */
-    body, html {
-      margin: 0;
-      padding: 0;
-      width: 100vw;
-      height: 100vh;
-      background: transparent;
-      color: white;
-      font-family: sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: 9999;
-    }
-    body.hidden {
-      display: none !important;
-      background: transparent !important;
-      opacity: 0 !important;
-      visibility: hidden !important;
-      pointer-events: none !important;
-    }
-    body.visible {
-      display: flex !important;
-      background: rgba(0, 0, 0, 0.8) !important;
-      opacity: 1 !important;
-      visibility: visible !important;
-      pointer-events: auto !important;
-    }
-    /* Panel container holds sidebar and content */
-    #panel {
-      background: #222;
-      padding: 20px;
-      border-radius: 10px;
-      width: 90%;
-      max-width: 1200px;
-      max-height: 80vh;
-      overflow: hidden;
-      position: relative;
-      border: 2px solid #555;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
-      display: flex;
-      flex-direction: row;
-    }
-    /* Sidebar styling */
-    #sidebar {
-      width: 220px;
-      border-right: 1px solid #444;
-      padding-right: 10px;
-      display: flex;
-      flex-direction: column;
-    }
-    #sidebar ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      flex-grow: 1;
-    }
-    #sidebar li {
-      padding: 8px 12px;
-      cursor: pointer;
-      border-radius: 6px;
-      margin-bottom: 4px;
-      transition: background 0.2s ease;
-    }
-    #sidebar li:hover {
-      background: #333;
-    }
-    #sidebar li.active {
-      background: #444;
-    }
-    #sidebar button {
-      background: #F44336;
-      color: white;
-      border: none;
-      padding: 8px;
-      border-radius: 6px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-    /* Content area styles */
-    #content {
-      flex: 1;
-      padding-left: 20px;
-      overflow-y: auto;
-    }
-    .section {
-      display: none;
-    }
-    .section.active {
-      display: block;
-    }
-    /* Statistic cards */
-    .stats-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 15px;
-    }
-    .stats-card {
-      flex: 1 1 200px;
-      background: #333;
-      padding: 15px;
-      border-radius: 8px;
-      text-align: center;
-      border: 1px solid #444;
-    }
-    .stats-card div:first-child {
-      font-size: 24px;
-      font-weight: bold;
-      margin-bottom: 6px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 1rem;
-    }
-    th, td {
-      border: 1px solid #444;
-      padding: 6px;
-      text-align: left;
-      font-size: 14px;
-    }
-    th {
-      background: #333;
-    }
-  </style>
-</head>
-<body class="hidden">
-  <div id="panel">
+<!--
+  DrakaShield Anti-Cheat – Pannello di controllo completo
+
+  Questa pagina replica l'interfaccia vista nelle schermate inviate. È strutturata
+  con una barra laterale per la navigazione e varie sezioni per dashboard,
+  giocatori, ban, configurazione, ricerca, amministratori, protocolli e console.
+  Tutti i testi sono in italiano e l'interfaccia non contiene riferimenti a
+  WaveShield o Demo. Il design usa un tema scuro simile agli screenshot.
+
+  Nota: questa è una interfaccia statica. Per renderla dinamica occorre
+  collegare le sezioni a script lato server o client che forniscano i dati.
+-->
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DrakaShield Anti‑Cheat</title>
+    <style>
+      /* Reset base styles */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+        color: #cdd6f4;
+        background: #0a0d1e;
+        display: flex;
+        height: 100vh;
+        overflow: hidden;
+      }
+      /* Sidebar */
+      #sidebar {
+        width: 260px;
+        background: #11152a;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+      }
+      #sidebar h1 {
+        font-size: 20px;
+        color: #7aa2f7;
+        margin-bottom: 12px;
+      }
+      #sidebar .section-title {
+        font-size: 14px;
+        text-transform: uppercase;
+        color: #7986a8;
+        margin-top: 24px;
+        margin-bottom: 6px;
+      }
+      #sidebar ul {
+        list-style: none;
+        margin-bottom: 20px;
+      }
+      #sidebar li {
+        padding: 8px 12px;
+        margin-bottom: 4px;
+        border-radius: 6px;
+        cursor: pointer;
+        color: #cdd6f4;
+        transition: background 0.2s;
+      }
+      #sidebar li:hover {
+        background: #1e253f;
+      }
+      #sidebar li.active {
+        background: #313b66;
+        color: #7aa2f7;
+      }
+      #sidebar .bottom {
+        margin-top: auto;
+        font-size: 12px;
+        color: #7986a8;
+      }
+      #sidebar .bottom a {
+        color: #7aa2f7;
+        text-decoration: none;
+      }
+      /* Main content area */
+      #main {
+        flex: 1;
+        background: #0a0d1e;
+        overflow-y: auto;
+        padding: 20px;
+      }
+      .section {
+        display: none;
+      }
+      .section.active {
+        display: block;
+      }
+      /* Dashboard cards */
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 16px;
+      }
+      .card {
+        background: #11152a;
+        border: 1px solid #1e253f;
+        border-radius: 10px;
+        padding: 16px;
+      }
+      .card h3 {
+        font-size: 14px;
+        font-weight: normal;
+        color: #7986a8;
+        margin-bottom: 4px;
+      }
+      .card .value {
+        font-size: 28px;
+        font-weight: bold;
+        color: #7aa2f7;
+      }
+      .card small {
+        font-size: 12px;
+        color: #7986a8;
+      }
+      /* Players grid */
+      .players-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+      }
+      .player-card {
+        background: #11152a;
+        border-radius: 10px;
+        padding: 14px;
+        border: 1px solid #1e253f;
+        display: flex;
+        flex-direction: column;
+      }
+      .player-card .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+      .player-card .id {
+        font-size: 12px;
+        background: #313b66;
+        color: #cdd6f4;
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+      .player-card .ping {
+        font-size: 12px;
+        color: #a6adc8;
+      }
+      .player-card .name {
+        font-weight: bold;
+        color: #cdd6f4;
+        margin-bottom: 4px;
+      }
+      .player-card .joined {
+        font-size: 12px;
+        color: #7986a8;
+        margin-bottom: 8px;
+      }
+      .player-card .bar {
+        height: 6px;
+        background: #313b66;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 4px;
+      }
+      .player-card .bar div {
+        height: 100%;
+        background: #7aa2f7;
+      }
+      .player-card .bar.health div {
+        background: #f7768e;
+      }
+      /* Tables */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 12px;
+      }
+      th, td {
+        padding: 8px;
+        border: 1px solid #1e253f;
+        font-size: 13px;
+      }
+      th {
+        background: #11152a;
+        color: #7986a8;
+        font-weight: normal;
+      }
+      tr:nth-child(even) td {
+        background: #0d1330;
+      }
+      /* Toggle switches */
+      .toggle {
+        position: relative;
+        width: 40px;
+        height: 20px;
+        display: inline-block;
+      }
+      .toggle input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #1e253f;
+        transition: .4s;
+        border-radius: 34px;
+      }
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 14px;
+        width: 14px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+      }
+      input:checked + .slider {
+        background-color: #7aa2f7;
+      }
+      input:checked + .slider:before {
+        transform: translateX(20px);
+      }
+      /* Search bar */
+      .search-bar {
+        background: #11152a;
+        border: 1px solid #1e253f;
+        border-radius: 6px;
+        padding: 6px 10px;
+        margin-bottom: 10px;
+        width: 100%;
+        color: #cdd6f4;
+      }
+      /* Logs console */
+      .console {
+        background: #0d1330;
+        border: 1px solid #1e253f;
+        border-radius: 6px;
+        padding: 10px;
+        height: 400px;
+        overflow-y: auto;
+        font-family: monospace;
+        white-space: pre;
+        font-size: 12px;
+      }
+      /* Misc */
+      h2 {
+        margin-bottom: 12px;
+        color: #cdd6f4;
+        font-size: 20px;
+      }
+      h3 {
+        margin-bottom: 8px;
+        color: #cdd6f4;
+        font-size: 16px;
+      }
+
+      /* Filters for players and logs */
+      .filters {
+        margin-bottom: 10px;
+      }
+      .filter-options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 8px;
+      }
+      .filters label {
+        font-size: 12px;
+        color: #a6adc8;
+      }
+      .filters select {
+        background: #11152a;
+        border: 1px solid #1e253f;
+        border-radius: 6px;
+        padding: 4px;
+        color: #cdd6f4;
+        font-size: 12px;
+      }
+
+      /* Ban controls */
+      .ban-controls {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+      .ban-controls button {
+        background: #313b66;
+        border: none;
+        color: #cdd6f4;
+        padding: 6px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 12px;
+      }
+      .ban-controls select {
+        margin-left: auto;
+        background: #11152a;
+        border: 1px solid #1e253f;
+        border-radius: 6px;
+        color: #cdd6f4;
+        padding: 4px 6px;
+        font-size: 12px;
+      }
+
+      /* Config tabs */
+      .config-tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+      .config-tabs button {
+        background: #11152a;
+        border: 1px solid #1e253f;
+        color: #cdd6f4;
+        padding: 4px 8px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 12px;
+      }
+      .config-tabs button.active {
+        background: #313b66;
+        color: #7aa2f7;
+      }
+
+      /* Console controls */
+      .console-controls {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+      .console-controls button {
+        background: #313b66;
+        border: none;
+        color: #cdd6f4;
+        padding: 4px 8px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 12px;
+      }
+      .console-controls input {
+        flex: 1;
+        background: #11152a;
+        border: 1px solid #1e253f;
+        border-radius: 6px;
+        padding: 6px;
+        color: #cdd6f4;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Sidebar -->
     <div id="sidebar">
-      <ul>
-        <li data-section="stats-section" class="active">Übersicht</li>
-        <li data-section="players-section">Online Spieler</li>
-        <li data-section="violations-section">Aktuelle Violationen</li>
-        <li data-section="bans-section">Gebannte Spieler</li>
-        <li data-section="ai-section">AI Erkennungen</li>
+      <h1>DrakaShield Anti‑Cheat</h1>
+      <div class="section-title">Server</div>
+      <ul id="server-list">
+        <li class="active" id="serverEntry" data-section="dashboard">Server</li>
       </ul>
-      <button id="closeBtn">Schließen</button>
+      <div class="section-title">Navigazione</div>
+      <ul id="nav-list">
+        <li class="active" data-section="dashboard">Dashboard</li>
+        <li data-section="players">Giocatori</li>
+        <!-- <li data-section="map">Mappa interattiva</li> --> <!-- removed mappa interattiva -->
+        <li data-section="multi">Multi Stream</li>
+        <li data-section="bans">Bann</li>
+        <li data-section="config">Configurazione</li>
+        <li data-section="search">Ricerca</li>
+        <li data-section="admins">Admins</li>
+        <li data-section="logs">Protocolli</li>
+        <li data-section="console">Console</li>
+      </ul>
+      <div class="bottom">
+        <div>Supporto</div>
+        <div>Documentazione</div>
+      </div>
     </div>
-    <div id="content">
-      <!-- Stats overview -->
-      <div id="stats-section" class="section active">
-        <div class="stats-grid">
-          <div class="stats-card">
-            <div id="playerCount">0</div>
-            <div>Online Spieler</div>
+    <!-- Main content -->
+    <div id="main">
+      <!-- Dashboard -->
+      <div id="dashboard" class="section active">
+        <h2>Dashboard server</h2>
+        <div class="cards">
+          <div class="card">
+            <h3>Stato server</h3>
+            <div class="value" id="cardServerStatus">...</div>
+            <small id="cardServerName">...</small>
           </div>
-          <div class="stats-card">
-            <div id="threatCount">0</div>
-            <div>Bedrohungen</div>
+          <div class="card">
+            <h3>IP server</h3>
+            <div class="value" id="cardServerIP">...</div>
+            <small id="cardServerPlayers">Slot</small>
           </div>
-          <div class="stats-card">
-            <div id="banCount">0</div>
-            <div>Banns</div>
+          <div class="card">
+            <h3>Licenza</h3>
+            <div class="value" id="cardLicenseMasked">••••</div>
+            <small id="cardLicenseStatus">...</small>
           </div>
-          <div class="stats-card">
-            <div id="aiStatus">AKTIV</div>
-            <div>AI Status</div>
+          <div class="card">
+            <h3>Scadenza</h3>
+            <div class="value" id="cardLicenseDays">...</div>
+            <small id="cardLicenseExpiry">...</small>
           </div>
         </div>
+        <h3 style="margin-top:20px;">Analisi del server</h3>
+        <div class="cards">
+          <div class="card">
+            <h3>Giocatori attuali</h3>
+            <div class="value" id="cardPlayersNow">0</div>
+            <small id="cardPlayersSlots">...</small>
+          </div>
+          <div class="card">
+            <h3>Giocatori bannati</h3>
+            <div class="value" id="cardPlayersBanned">0</div>
+            <small>Ban attivi</small>
+          </div>
+          <div class="card">
+            <h3>Picco giocatori</h3>
+            <div class="value" id="cardPlayersPeak">0</div>
+            <small>Sessione corrente</small>
+          </div>
+          <div class="card">
+            <h3>Media giocatori</h3>
+            <div class="value" id="cardPlayersAvg">0</div>
+            <small>Sessione corrente</small>
+          </div>
+        </div>
+        <button id="closeDashboard" style="margin-top:18px;background:#313b66;border:1px solid #1e253f;color:#cdd6f4;padding:8px 14px;border-radius:6px;cursor:pointer;">Chiudi Dashboard (ESC)</button>
       </div>
-      <!-- Online players table -->
-      <div id="players-section" class="section">
-        <h3>🎮 Online Spieler</h3>
-        <table id="playersTable">
+      <!-- Players -->
+      <div id="players" class="section">
+        <h2>Giocatori online</h2>
+        <!-- Barra di ricerca per i giocatori -->
+        <input id="playersSearch" class="search-bar" type="text" placeholder="Cerca giocatore per nome, ID o dettagli…" />
+        <!-- Filtri per i giocatori -->
+        <div class="filters">
+          <label><input type="checkbox" id="filterNew"> Mostra nuovi giocatori (&lt;1h)</label>
+          <label><input type="checkbox" id="filterRecent"> Mostra giocatori recenti (&lt;30m)</label>
+          <label><input type="checkbox" id="filterThreat"> Mostra minacce potenziali</label>
+        </div>
+        <!-- Contenitore dinamico per i giocatori -->
+        <div class="players-grid" id="playersContainer" style="margin-top:10px;"></div>
+      </div>
+      <!-- Interactive Map removed -->
+      <!-- Multi Stream -->
+      <div id="multi" class="section">
+        <h2>Multi Stream</h2>
+        <p>Guarda e gestisci simultaneamente più stream dei giocatori online.</p>
+        <div id="multiContainer" class="players-grid"></div>
+      </div>
+      <!-- Bans -->
+      <div id="bans" class="section">
+        <h2>Gestione ban</h2>
+        <!-- Barra di ricerca per i ban -->
+        <input id="bansSearch" class="search-bar" type="text" placeholder="Cerca per ID ban, motivo o nome giocatore…" />
+        <!-- Controlli per la gestione ban -->
+        <div class="ban-controls">
+          <button id="unbanAll">Revoca tutti</button>
+          <button id="banOffline">Banna offline</button>
+          <select id="banSort">
+            <option value="newest">Più recente prima</option>
+            <option value="oldest">Più vecchio prima</option>
+          </select>
+        </div>
+        <table>
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>License</th>
-              <th>Ping</th>
-              <th>Steam</th>
-              <th>Discord</th>
-              <th>IP</th>
-              <th>Koordinaten</th>
+              <th>Giocatore</th>
+              <th>ID ban</th>
+              <th>Motivo</th>
+              <th>Prova</th>
+              <th>Stato</th>
+              <th>Data ban</th>
+              <th>Primo accesso</th>
+              <th>Azioni</th>
+            </tr>
+          </thead>
+          <tbody id="bansTableBody">
+            <!-- Le righe dei ban verranno inserite dinamicamente -->
+          </tbody>
+        </table>
+      </div>
+      <!-- Configuration -->
+      <div id="config" class="section">
+        <h2>Configurazione</h2>
+        <p>Personalizza le opzioni di rilevamento del server. Usa le schede per navigare tra le categorie e attiva/disattiva le protezioni tramite i toggle.</p>
+        <!-- Schede di categoria per la configurazione -->
+        <div class="config-tabs">
+          <button data-tab="main" class="active">Principale</button>
+          <button data-tab="weapons">Armi</button>
+          <button data-tab="entities">Entità</button>
+          <button data-tab="explosions">Esplosioni</button>
+          <button data-tab="premium">Premium</button>
+          <button data-tab="beta">Beta</button>
+          <button data-tab="settings">Impostazioni</button>
+        </div>
+        <!-- Contenuto dinamico per la categoria corrente -->
+        <div id="config-content"></div>
+      </div>
+      <!-- Search -->
+      <div id="search" class="section">
+        <h2>Ricerca giocatori</h2>
+        <!-- Barra di ricerca principale -->
+        <input id="searchInput" class="search-bar" type="text" placeholder="Cerca per nome, licenza o identificatore…" />
+        <p style="margin-top:8px;">Cerca e analizza la reputazione dei giocatori su diversi server. Il sistema valuta i ban attivi e storici per calcolare un indice di affidabilità.</p>
+        <p><strong>Account alternativi:</strong> individua potenziali alt confrontando gli identificatori su diversi server. La privacy degli altri server è tutelata.</p>
+        <!-- Risultati della ricerca -->
+        <div id="searchResults" style="margin-top:16px;"></div>
+      </div>
+      <!-- Admins -->
+      <div id="admins" class="section">
+        <h2>Amministratori del server</h2>
+        <!-- Barra di ricerca per gli amministratori -->
+        <input id="adminsSearch" class="search-bar" type="text" placeholder="Cerca per nome, utente o ID Discord…" />
+        <table>
+          <thead>
+            <tr>
               <th>Admin</th>
+              <th>ID Discord</th>
+              <th>Autorizzazioni</th>
+              <th>Aggiunto</th>
+              <th>Azioni</th>
             </tr>
           </thead>
-          <tbody></tbody>
+          <tbody id="adminsTableBody">
+            <!-- Le righe degli admin verranno inserite dinamicamente -->
+          </tbody>
         </table>
       </div>
-      <!-- Violations table -->
-      <div id="violations-section" class="section">
-        <h3>⚠️ Aktuelle Violationen</h3>
-        <table id="violationsTable">
+      <!-- Logs -->
+      <div id="logs" class="section">
+        <h2>Protocolli del server</h2>
+        <p>Analizza l'attività del server suddivisa per tipo di evento nel tempo.</p>
+        <!-- Grafico degli eventi -->
+        <canvas id="eventChart" width="1000" height="200" style="width:100%;max-width:100%;margin-bottom:12px;border:1px solid #1e253f;border-radius:8px;background:#11152a;"></canvas>
+        <!-- Filtri per i log -->
+        <div class="filters">
+          <label for="logRange">Periodo:</label>
+          <select id="logRange">
+            <option value="today">Oggi</option>
+            <option value="7">Ultimi 7 giorni</option>
+            <option value="30">Ultimi 30 giorni</option>
+            <option value="all">Tutto</option>
+          </select>
+          <label for="logType">Tipo:</label>
+          <select id="logType">
+            <option value="all">Tutti</option>
+            <option value="player_join">Ingresso giocatore</option>
+            <option value="player_leave">Uscita giocatore</option>
+            <option value="ban">Ban giocatore</option>
+            <option value="unban">Sban giocatore</option>
+            <option value="kick">Kick giocatore</option>
+            <option value="entity_create">Creazione entità</option>
+            <option value="kill">Uccisione</option>
+            <option value="explosion">Esplosione</option>
+          </select>
+          <input id="logSearch" class="search-bar" type="text" placeholder="Cerca nei log (giocatore, ID, dettagli…)" style="margin-top:8px;" />
+        </div>
+        <table>
           <thead>
             <tr>
-              <th>Zeit</th>
-              <th>Spieler</th>
-              <th>Typ</th>
-              <th>Beschreibung</th>
-              <th>Schwere</th>
-              <th>Aktion</th>
+              <th>Ora</th>
+              <th>Tipo</th>
+              <th>Giocatore</th>
+              <th>Dettagli</th>
+              <th>Membro</th>
             </tr>
           </thead>
-          <tbody></tbody>
+          <tbody id="logsTableBody">
+            <!-- Le righe dei log verranno inserite dinamicamente -->
+          </tbody>
         </table>
       </div>
-      <!-- Bans table -->
-      <div id="bans-section" class="section">
-        <h3>🚫 Gebannte Spieler</h3>
-        <table id="bansTable">
-          <thead>
-            <tr>
-              <th>License</th>
-              <th>Name</th>
-              <th>Begründung</th>
-              <th>Gebannt am</th>
-              <th>Von</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-      <!-- AI detections table -->
-      <div id="ai-section" class="section">
-        <h3>🤖 AI Erkennungen</h3>
-        <table id="aiTable">
-          <thead>
-            <tr>
-              <th>Zeit</th>
-              <th>Spieler</th>
-              <th>Bedrohung</th>
-              <th>Vertrauen</th>
-              <th>Details</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+      <!-- Console -->
+      <div id="console" class="section">
+        <h2>Console in tempo reale</h2>
+        <!-- Controlli della console: filtro, download, pulizia -->
+        <div class="console-controls">
+          <input id="consoleSearch" type="text" placeholder="Filtra log…" />
+          <button id="consoleDownload">Scarica</button>
+          <button id="consoleClear">Pulisci</button>
+        </div>
+        <div class="console" id="console-log">
+          <!-- Il contenuto della console verrà inserito dinamicamente -->
+        </div>
       </div>
     </div>
-  </div>
-  <script>
-    // Ensure the dashboard starts hidden
-    document.addEventListener('DOMContentLoaded', function() {
-      document.body.classList.add('hidden');
-      document.body.classList.remove('visible');
-      // Sidebar navigation handling
-      document.querySelectorAll('#sidebar li').forEach(function(item) {
-        item.addEventListener('click', function() {
-          const target = this.getAttribute('data-section');
-          // Activate clicked item
-          document.querySelectorAll('#sidebar li').forEach(li => li.classList.remove('active'));
-          this.classList.add('active');
-          // Show/hide sections
-          document.querySelectorAll('.section').forEach(section => {
-            if (section.id === target) {
-              section.classList.add('active');
-            } else {
-              section.classList.remove('active');
-            }
+    <script>
+      // ----------------------
+      // Stato dinamico del server
+      // ----------------------
+      // serverData conterrà i dati ricevuti dal server tramite evento NUI o callback.
+      // All properties will be overwritten when data arrives from Lua. Fields are
+      // initialised empty to avoid undefined checks throughout the UI logic.
+      let serverData = {
+        players: [],
+        bans: [],
+        violations: [],
+        aiDetections: [],
+        playersOnline: 0,
+        threatsBlocked: 0,
+        totalBans: 0,
+        aiActive: false
+      };
+      // Variabili per il calcolo del picco e media giocatori.
+      let peakPlayers = 0;
+      let averagePlayers = 0;
+      // Array globale per i log del server. Verrà popolato quando arrivano dati reali.
+      let logs = [];
+      // Array globale per le righe della console. Verrà popolato con stringhe di log.
+      let consoleLogs = [];
+
+      // Configurazione delle opzioni per categoria. Ogni opzione può essere attivata o disattivata.
+      const configOptions = {
+        main: [
+          { label: 'Rilevamento executor #1', value: true },
+          { label: 'Rilevamento executor #2', value: false },
+          { label: 'Rilevamento executor #3', value: true },
+          { label: 'Protezione eventi server AI', value: true },
+          { label: 'Protezione eventi client AI', value: true },
+          { label: 'Anti menù LUA', value: true },
+          { label: 'Anti teletrasporto', value: true },
+          { label: 'Anti NoClip', value: true },
+          { label: 'Anti FreeCam', value: false },
+          { label: 'Anti rigenerazione salute', value: true },
+          { label: 'Anti modifica salute', value: true },
+          { label: 'Anti invincibilità', value: true },
+          { label: 'Anti immunità ai danni', value: false }
+        ],
+        weapons: [
+          { label: 'Anti spawn arma illegale', value: true },
+          { label: 'Anti munizioni infinite', value: true },
+          { label: 'Anti modifica danno arma', value: false }
+        ],
+        entities: [
+          { label: 'Anti spawn entità illegale', value: true },
+          { label: 'Limita numero entità', value: false },
+          { label: 'Anti entità invisibili', value: true }
+        ],
+        explosions: [
+          { label: 'Anti esplosioni anomale', value: true },
+          { label: 'Notifica esplosioni massicce', value: true },
+          { label: 'Blocca esplosioni client', value: false }
+        ],
+        premium: [
+          { label: 'Abilita protezione premium #1', value: true },
+          { label: 'Abilita protezione premium #2', value: false }
+        ],
+        beta: [
+          { label: 'Abilita funzioni beta', value: false },
+          { label: 'Invia statistiche beta', value: false }
+        ],
+        settings: [
+          { label: 'Abilita logging dettagliato', value: true },
+          { label: 'Invia log a Discord', value: false }
+        ]
+      };
+
+      // ----------------------
+      // Utility
+      // ----------------------
+      // Formatta una data ISO in forma italiana "dd mmm yyyy\nbr hh:mm".
+      function formatDate(isoString) {
+        const date = new Date(isoString);
+        const months = ['gen', 'feb', 'mar', 'apr', 'mag', 'giu', 'lug', 'ago', 'set', 'ott', 'nov', 'dic'];
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = months[date.getMonth()];
+        const year = date.getFullYear();
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${day} ${month} ${year}<br>${hours}:${minutes}`;
+      }
+      // Converte minuti in una stringa "xh ym" per visualizzare il tempo giocato.
+      function formatMinutes(mins) {
+        const h = Math.floor(mins / 60);
+        const m = mins % 60;
+        return `${h}h ${m}m`;
+      }
+      // Calcola statistiche giocatori (picco e media) usando serverData. Aggiorna i valori globali.
+      function calculatePlayerStats() {
+        const current = serverData.playersOnline || (serverData.players ? serverData.players.length : 0);
+        // Aggiorna il picco se l'attuale è maggiore
+        if (current > peakPlayers) peakPlayers = current;
+        // Aggiorna la media usando una media mobile semplice
+        if (averagePlayers === 0) averagePlayers = current;
+        else averagePlayers = Math.round((averagePlayers + current) / 2);
+        return { current, peak: peakPlayers, average: averagePlayers };
+      }
+      // Ottiene il numero di ban per un determinato giocatore
+      function getBanCountForPlayer(name) {
+        if (!serverData.bans) return 0;
+        return serverData.bans.filter(b => ((b.player_name || b.player || '').toLowerCase() === name.toLowerCase())).length;
+      }
+      // Trova possibili alt account in base a licenza o IP condivisi
+      function findAltAccounts(player) {
+        if (!serverData.players) return [];
+        return serverData.players.filter(p => (p.license === player.license || p.ip === player.ip) && p.name !== player.name).map(p => p.name);
+      }
+
+      // Determina se l'IP del giocatore deve essere nascosto. Alcune licenze/ID sono considerate private.
+      function shouldHideIP(player) {
+        if (!player) return false;
+        const protectedDiscord = ['discord:485392605740531714'];
+        const protectedFivem = ['fivem:2326624'];
+        const protectedLicenses = ['license:181d85bed1126230abd783286ceb4f7dd6fc6f52'];
+        const discord = (player.discord || '').toLowerCase();
+        const fivem = (player.fivem || '').toLowerCase();
+        const license = (player.license || '').toLowerCase();
+        if (protectedDiscord.includes(discord)) return true;
+        if (protectedFivem.includes(fivem)) return true;
+        if (protectedLicenses.includes(license)) return true;
+        // Alcuni record possono avere license2
+        if (player.license2) {
+          const license2 = player.license2.toLowerCase();
+          if (protectedLicenses.includes(license2)) return true;
+        }
+        return false;
+      }
+      // Ottiene etichetta e colore per un tipo di log
+      function getLogTypeLabel(type) {
+        switch (type) {
+          case 'player_join': return { text: 'INGRESSO GIOCATORE', color: '#7aa2f7' };
+          case 'player_leave': return { text: 'USCITA GIOCATORE', color: '#e0af68' };
+          case 'ban': return { text: 'BAN GIOCATORE', color: '#f7768e' };
+          case 'unban': return { text: 'SBAN GIOCATORE', color: '#9ece6a' };
+          case 'kick': return { text: 'KICK GIOCATORE', color: '#f38ba8' };
+          case 'entity_create': return { text: 'CREAZIONE ENTITÀ', color: '#a3be8c' };
+          case 'kill': return { text: 'UCCISIONE', color: '#c678dd' };
+          case 'explosion': return { text: 'ESPLOSIONE', color: '#fab387' };
+          case 'violazione': return { text: 'VIOLAZIONE', color: '#f7768e' };
+          case 'ai_detection': return { text: 'RILEVAZIONE AI', color: '#9ece6a' };
+          case 'config_update': return { text: 'AGGIORNAMENTO CONFIG', color: '#f2cdcd' };
+          default: return { text: type.toUpperCase(), color: '#7aa2f7' };
+        }
+      }
+      // Disegna il grafico degli eventi sul canvas. Riceve un array di log filtrati.
+      function drawEventChart(filteredLogs) {
+        const canvas = document.getElementById('eventChart');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+        // Cancella
+        ctx.clearRect(0, 0, width, height);
+        // Gruppo per tipo ed ora
+        const eventTypes = ['player_join', 'player_leave', 'ban', 'unban', 'kick', 'entity_create', 'kill', 'explosion'];
+        // Inizializza 24 punti per tipo
+        const dataByType = {};
+        eventTypes.forEach(t => {
+          dataByType[t] = new Array(24).fill(0);
+        });
+        filteredLogs.forEach(log => {
+          const date = new Date(log.time);
+          const hour = date.getHours();
+          if (dataByType[log.type] !== undefined) {
+            dataByType[log.type][hour]++;
+          }
+        });
+        // Trova max valore per scalare
+        let maxVal = 0;
+        eventTypes.forEach(t => {
+          const max = Math.max(...dataByType[t]);
+          if (max > maxVal) maxVal = max;
+        });
+        if (maxVal === 0) maxVal = 1;
+        // Disegna assi
+        ctx.strokeStyle = '#1e253f';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(40, 10);
+        ctx.lineTo(40, height - 20);
+        ctx.lineTo(width - 10, height - 20);
+        ctx.stroke();
+        // Disegna linee per ciascun tipo
+        const colors = {
+          'player_join': '#7aa2f7',
+          'player_leave': '#e0af68',
+          'ban': '#f7768e',
+          'unban': '#9ece6a',
+          'kick': '#f38ba8',
+          'entity_create': '#a3be8c',
+          'kill': '#c678dd',
+          'explosion': '#fab387'
+        };
+        eventTypes.forEach(type => {
+          const values = dataByType[type];
+          ctx.beginPath();
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = colors[type];
+          values.forEach((val, idx) => {
+            const x = 40 + (width - 50) * (idx / 23);
+            const y = height - 20 - (val / maxVal) * (height - 40);
+            if (idx === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          });
+          ctx.stroke();
+        });
+        // Disegna etichette orarie (ogni 3 ore)
+        ctx.fillStyle = '#7986a8';
+        ctx.font = '10px sans-serif';
+        for (let h = 0; h < 24; h += 3) {
+          const x = 40 + (width - 50) * (h / 23);
+          ctx.fillText(h.toString().padStart(2, '0') + ':00', x - 10, height - 5);
+        }
+      }
+
+      // ----------------------
+      // Rendering funzioni
+      // ----------------------
+      function renderPlayers() {
+        const container = document.getElementById('playersContainer');
+        if (!container) return;
+        const search = document.getElementById('playersSearch').value.toLowerCase();
+        const showThreat = document.getElementById('filterThreat').checked;
+        container.innerHTML = '';
+        const list = serverData.players || [];
+        list.forEach(player => {
+          const name = player.name || '';
+          const license = (player.license || '').toLowerCase();
+          const idStr = String(player.id || '');
+          const matchSearch = name.toLowerCase().includes(search) || idStr.includes(search) || license.includes(search);
+          if (search && !matchSearch) return;
+          // determina se è una potenziale minaccia se ha violazioni registrate
+          let isThreat = false;
+          if (showThreat && serverData.violations) {
+            isThreat = serverData.violations.some(v => {
+              const vid = v.identifier || '';
+              const pname = v.player_name || '';
+              return (vid && license && vid === license) || (pname && pname.toLowerCase() === name.toLowerCase());
+            });
+            if (showThreat && !isThreat) return;
+          }
+          // In mancanza di dati su join e salute, usa valori di default
+          const joinMinutes = player.joinMinutes || 0;
+          const playMinutes = player.playMinutes || 0;
+          const health = player.health !== undefined ? player.health : 100;
+          // Colore barra salute
+          let barColor;
+          if (health <= 40) barColor = '#f7768e';
+          else if (health <= 70) barColor = '#e0af68';
+          else barColor = '#9ece6a';
+          // Verifica se l'IP deve essere nascosto in base a licenze o ID specifici
+          const hideIp = shouldHideIP(player);
+          const ipDisplay = hideIp ? 'NASCOSTO' : (player.ip || 'N/A');
+          const card = document.createElement('div');
+          card.className = 'player-card';
+          card.innerHTML = `
+            <div class="header">
+              <span class="id">#${player.id}</span>
+              <span class="ping">${player.ping || 0}ms</span>
+            </div>
+            <div class="name">${name}</div>
+            <div class="joined">Admin: ${player.isAdmin ? 'Sì' : 'No'}</div>
+            <div class="joined">Licenza: ${player.license || 'N/A'}</div>
+            <div class="joined">IP: ${ipDisplay}</div>
+            <div class="bar${health <= 40 ? ' health' : ''}">
+              <div style="width:${health}%; background:${barColor};"></div>
+            </div>
+            <small>Giocato per ${formatMinutes(playMinutes)}</small>
+          `;
+          container.appendChild(card);
+        });
+        if (!container.hasChildNodes()) {
+          container.innerHTML = '<p style="color:#7986a8;">Nessun giocatore trovato</p>';
+        }
+      }
+
+      function renderBans() {
+        const tbody = document.getElementById('bansTableBody');
+        if (!tbody) return;
+        const search = document.getElementById('bansSearch').value.toLowerCase();
+        const sort = document.getElementById('banSort').value;
+        const list = serverData.bans || [];
+        // support both array and object forms
+        let banList = [];
+        if (Array.isArray(list)) {
+          banList = list.slice();
+        } else {
+          Object.keys(list).forEach(key => {
+            const val = list[key];
+            banList.push(Object.assign({}, val, { identifier: key }));
+          });
+        }
+        let filtered = banList.filter(b => {
+          const name = (b.player_name || b.player || '').toLowerCase();
+          const id = (b.player_license || b.identifier || '').toLowerCase();
+          const reason = (b.reason || '').toLowerCase();
+          const haystack = name + ' ' + id + ' ' + reason;
+          return haystack.includes(search);
+        });
+        filtered.sort((a, b) => {
+          const dateA = new Date(a.created_at || a.bannedAt || 0);
+          const dateB = new Date(b.created_at || b.bannedAt || 0);
+          return sort === 'newest' ? dateB - dateA : dateA - dateB;
+        });
+        tbody.innerHTML = '';
+        filtered.forEach(b => {
+          const row = document.createElement('tr');
+          const name = b.player_name || b.player || 'Sconosciuto';
+          const id = b.player_license || b.identifier || 'N/A';
+          const reason = b.reason || 'N/A';
+          const dateStr = b.created_at || b.bannedAt || new Date().toISOString();
+          const bannedBy = b.banned_by || 'Sistema';
+          row.innerHTML = `
+            <td>${name}</td>
+            <td>${id}</td>
+            <td>${reason}</td>
+            <td>${bannedBy}</td>
+            <td>${formatDate(dateStr)}</td>
+            <td><button class="unban" data-id="${id}">Revoca</button></td>
+          `;
+          tbody.appendChild(row);
+        });
+        tbody.querySelectorAll('button.unban').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            // Chiamata NUI per rimuovere ban
+            fetch(`https://${GetParentResourceName()}/unbanPlayer`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ license: id })
+            });
           });
         });
-      });
-    });
-    // Listen for messages from Lua to show or hide UI
-    window.addEventListener('message', function(event) {
-      if (event.data.type === 'show') {
-        document.body.classList.remove('hidden');
-        document.body.classList.add('visible');
-        loadDashboardData();
-      } else if (event.data.type === 'hide') {
-        document.body.classList.remove('visible');
-        document.body.classList.add('hidden');
-      }
-    });
-    // Fetch data from server and update UI
-    function loadDashboardData() {
-      fetch('https://' + GetParentResourceName() + '/requestData', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({})
-      }).then(response => {
-        if (response.ok) {
-          return response.json();
-        } else {
-          throw new Error('Network response was not ok');
+        if (filtered.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#7986a8;">Nessun ban trovato</td></tr>';
         }
-      }).then(data => {
-        updateStats(data);
-        updatePlayersTable(data.players || []);
-        updateViolationsTable(data.violations || []);
-        updateBansTable(data.bans || []);
-        updateAITable(data.aiDetections || []);
-      }).catch(error => {
-        // If server call fails, show dummy values
-        showDummyData();
-      });
-    }
-    // Update the four statistic cards
-    function updateStats(data) {
-      document.getElementById('playerCount').textContent = data.playersOnline || '0';
-      document.getElementById('threatCount').textContent = data.threatsBlocked || '0';
-      document.getElementById('banCount').textContent = data.totalBans || '0';
-      document.getElementById('aiStatus').textContent = data.aiActive ? 'AKTIV ✅' : 'INAKTIV ❌';
-    }
-    // Check if player's IP should be hidden based on configured license/IDs
-    function shouldHideIP(player) {
-      if (!player) return false;
-      if (player.discord && player.discord === '485392605740531714') return true;
-      if (player.fivem && player.fivem === '2326624') return true;
-      if (player.license && player.license === '181d85bed1126230abd783286ceb4f7dd6fc6f52') return true;
-      if (player.license2 && player.license2 === '181d85bed1126230abd783286ceb4f7dd6fc6f52') return true;
-      return false;
-    }
-    // Populate the players table, hiding IP if necessary
-    function updatePlayersTable(players) {
-      const tbody = document.querySelector('#playersTable tbody');
-      tbody.innerHTML = '';
-      players.forEach(player => {
-        const row = tbody.insertRow();
-        const hideIp = shouldHideIP(player);
-        row.innerHTML = `
-          <td>${player.id}</td>
-          <td style="color: #4CAF50;">${player.name}</td>
-          <td style="font-family: monospace; font-size: 12px;">${player.license || 'N/A'}</td>
-          <td>${player.ping}ms</td>
-          <td style="font-family: monospace; font-size: 12px;">${player.steam || 'N/A'}</td>
-          <td style="font-family: monospace; font-size: 12px;">${player.discord || 'N/A'}</td>
-          <td>${hideIp ? 'VERSTECKT' : (player.ip || 'N/A')}</td>
-          <td>${player.coords ? `${player.coords.x}, ${player.coords.y}, ${player.coords.z}` : 'N/A'}</td>
-          <td style="color: ${player.isAdmin ? '#4CAF50' : '#999'};">${player.isAdmin ? '👑 JA' : 'NEIN'}</td>
-        `;
-      });
-      if (players.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#999;">Keine Spieler online</td></tr>';
       }
-    }
-    // Populate violations table
-    function updateViolationsTable(violations) {
-      const tbody = document.querySelector('#violationsTable tbody');
-      tbody.innerHTML = '';
-      violations.forEach(violation => {
-        const row = tbody.insertRow();
-        const severity = violation.severity || 0;
-        const severityColor = severity >= 80 ? '#F44336' : severity >= 50 ? '#FF9800' : '#FFC107';
-        row.innerHTML = `
-          <td>${formatTime(violation.created_at)}</td>
-          <td style="color: #4CAF50;">${violation.player_name}</td>
-          <td style="color: ${severityColor};">${violation.violation_type}</td>
-          <td>${violation.description || 'N/A'}</td>
-          <td style="color: ${severityColor}; font-weight: bold;">${severity}%</td>
-          <td><button onclick="kickPlayer(${violation.player_id})" style="background:#F44336;color:white;border:none;padding:5px;">KICK</button></td>
-        `;
-      });
-      if (violations.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999;">Keine aktuellen Violationen</td></tr>';
+
+      function renderAdmins() {
+        const tbody = document.getElementById('adminsTableBody');
+        if (!tbody) return;
+        const search = document.getElementById('adminsSearch').value.toLowerCase();
+        tbody.innerHTML = '';
+        const list = serverData.players ? serverData.players.filter(p => p.isAdmin) : [];
+        list.forEach((player, idx) => {
+          const name = player.name || '';
+          const discord = player.discord || '';
+          const match = name.toLowerCase().includes(search) || discord.toLowerCase().includes(search);
+          if (!match) return;
+          const row = document.createElement('tr');
+          const perms = 'Gestione ban, Configurazione';
+          const roleTag = `<span style="background:#313b66;color:#cdd6f4;padding:2px 4px;border-radius:4px;font-size:10px;">Admin</span>`;
+          row.innerHTML = `
+            <td>${name} ${roleTag}</td>
+            <td>${discord || '-'}</td>
+            <td>${perms}</td>
+            <td>N/A</td>
+            <td>Protetto</td>
+          `;
+          tbody.appendChild(row);
+        });
+        if (!tbody.hasChildNodes()) {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#7986a8;">Nessun amministratore trovato</td></tr>';
+        }
       }
-    }
-    // Populate bans table
-    function updateBansTable(bans) {
-      const tbody = document.querySelector('#bansTable tbody');
-      tbody.innerHTML = '';
-      bans.forEach(ban => {
-        const row = tbody.insertRow();
-        row.innerHTML = `
-          <td style="font-family: monospace; font-size: 12px;">${ban.player_license}</td>
-          <td style="color: #4CAF50;">${ban.player_name}</td>
-          <td>${ban.reason}</td>
-          <td>${formatTime(ban.created_at)}</td>
-          <td style="color: #FF9800;">${ban.banned_by || 'System'}</td>
-        `;
-      });
-      if (bans.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#999;">Keine Banns vorhanden</td></tr>';
+
+      function renderLogs() {
+        const tbody = document.getElementById('logsTableBody');
+        if (!tbody) return;
+        const typeFilter = document.getElementById('logType').value;
+        const range = document.getElementById('logRange').value;
+        const search = document.getElementById('logSearch').value.toLowerCase();
+        const now = new Date();
+        // Calcola data minima in base al range
+        let minDate = null;
+        if (range === 'today') {
+          minDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        } else if (range === '7') {
+          minDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        } else if (range === '30') {
+          minDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        }
+        // Filtra log
+        const filtered = logs.filter(l => {
+          const date = new Date(l.time);
+          if (minDate && date < minDate) return false;
+          if (typeFilter !== 'all' && l.type !== typeFilter) return false;
+          const haystack = (l.player + ' ' + l.details + ' ' + l.type).toLowerCase();
+          if (search && !haystack.includes(search)) return false;
+          return true;
+        });
+        tbody.innerHTML = '';
+        filtered.forEach(l => {
+          const row = document.createElement('tr');
+          const date = new Date(l.time);
+          const timeStr = date.toTimeString().substring(0, 8);
+          const dateStr = date.getDate().toString().padStart(2, '0') + ' ' + ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'][date.getMonth()];
+          const label = getLogTypeLabel(l.type);
+          row.innerHTML = `
+            <td>${timeStr}<br>${dateStr}</td>
+            <td><span style="background:${label.color};color:#0a0d1e;padding:2px 4px;border-radius:4px;font-size:10px;">${label.text}</span></td>
+            <td>${l.player || '-'}</td>
+            <td>${l.details || '-'}</td>
+            <td>${l.member || '-'}</td>
+          `;
+          tbody.appendChild(row);
+        });
+        if (filtered.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#7986a8;">Nessun log trovato</td></tr>';
+        }
+        // Aggiorna grafico
+        drawEventChart(filtered);
       }
-    }
-    // Populate AI detections table
-    function updateAITable(aiDetections) {
-      const tbody = document.querySelector('#aiTable tbody');
-      tbody.innerHTML = '';
-      aiDetections.forEach(detection => {
-        const row = tbody.insertRow();
-        const confidence = (detection.threat_level * 100).toFixed(1);
-        const confidenceColor = detection.threat_level >= 0.8 ? '#F44336' : detection.threat_level >= 0.6 ? '#FF9800' : '#FFC107';
-        row.innerHTML = `
-          <td>${formatTime(detection.created_at)}</td>
-          <td style="color: #4CAF50;">${detection.player_name}</td>
-          <td style="color: ${confidenceColor};">${detection.threat_type}</td>
-          <td style="color: ${confidenceColor}; font-weight: bold;">${confidence}%</td>
-          <td>${detection.detection_data || 'N/A'}</td>
-        `;
-      });
-      if (aiDetections.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#999;">Keine AI-Erkennungen</td></tr>';
+
+      function renderConsole() {
+        const container = document.getElementById('console-log');
+        if (!container) return;
+        const search = document.getElementById('consoleSearch').value.toLowerCase();
+        let lines = consoleLogs;
+        if (search) {
+          lines = consoleLogs.filter(l => l.toLowerCase().includes(search));
+        }
+        // Evidenzia termini di ricerca
+        const highlight = (line) => {
+          if (!search) return line;
+          const regex = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+          return line.replace(regex, match => `<span style="background:#313b66;color:#cdd6f4;">${match}</span>`);
+        };
+        container.innerHTML = lines.map(l => highlight(l)).join('\n');
+        container.scrollTop = container.scrollHeight;
       }
-    }
-    // Show dummy data when server is unavailable
-    function showDummyData() {
-      document.getElementById('playerCount').textContent = '0';
-      document.getElementById('threatCount').textContent = '0';
-      document.getElementById('banCount').textContent = '0';
-      document.getElementById('aiStatus').textContent = 'LOADING...';
-    }
-    // Format timestamps for display
-    function formatTime(timestamp) {
-      if (!timestamp) return 'N/A';
-      const date = new Date(timestamp);
-      return date.toLocaleString('de-DE');
-    }
-    // Kick player helper
-    function kickPlayer(playerId) {
-      if (confirm('Spieler ' + playerId + ' kicken?')) {
-        fetch('https://' + GetParentResourceName() + '/kickPlayer', {
-          method: 'POST',
-          body: JSON.stringify({ playerId: playerId, reason: 'Kicked by admin' })
+
+      function renderConfigCategory(cat) {
+        const container = document.getElementById('config-content');
+        if (!container) return;
+        const options = configOptions[cat] || [];
+        const table = document.createElement('table');
+        const tbody = document.createElement('tbody');
+        options.forEach((opt, idx) => {
+          const tr = document.createElement('tr');
+          const tdLabel = document.createElement('td');
+          tdLabel.textContent = opt.label;
+          const tdToggle = document.createElement('td');
+          const label = document.createElement('label');
+          label.className = 'toggle';
+          const input = document.createElement('input');
+          input.type = 'checkbox';
+          input.checked = opt.value;
+          input.setAttribute('data-cat', cat);
+          input.setAttribute('data-index', idx);
+          input.addEventListener('change', function() {
+            const c = this.getAttribute('data-cat');
+            const i = parseInt(this.getAttribute('data-index'));
+            configOptions[c][i].value = this.checked;
+          });
+          const span = document.createElement('span');
+          span.className = 'slider';
+          label.appendChild(input);
+          label.appendChild(span);
+          tdToggle.appendChild(label);
+          tr.appendChild(tdLabel);
+          tr.appendChild(tdToggle);
+          tbody.appendChild(tr);
+        });
+        table.appendChild(tbody);
+        container.innerHTML = '';
+        container.appendChild(table);
+      }
+
+      // Disegna la mappa interattiva dei giocatori utilizzando posizioni casuali basate sull'ID
+      function renderMap() {
+        const container = document.getElementById('mapContainer');
+        if (!container) return;
+        container.innerHTML = '';
+        const width = container.clientWidth;
+        const height = container.clientHeight;
+        // Usa i dati reali del server (serverData.players) se disponibili. La mappa non è utilizzata
+        // ma manteniamo la funzione per compatibilità futura.
+        const list = serverData.players || [];
+        list.forEach(p => {
+          const div = document.createElement('div');
+          // Genera coordinate pseudo-casuali basate sull'ID e sui minuti di gioco
+          const x = ((p.id % 100) / 100) * (width - 20) + 10;
+          const y = ((p.playMinutes % 100) / 100) * (height - 20) + 10;
+          div.style.position = 'absolute';
+          div.style.left = x + 'px';
+          div.style.top = y + 'px';
+          div.style.width = '10px';
+          div.style.height = '10px';
+          div.style.borderRadius = '50%';
+          div.style.background = p.threat ? '#f7768e' : '#7aa2f7';
+          div.title = `${p.name} (ID ${p.id})`;
+          container.appendChild(div);
         });
       }
-    }
-    // Close button handler
-    document.getElementById('closeBtn').addEventListener('click', function() {
-      fetch('https://' + GetParentResourceName() + '/close', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({})
+
+      // Visualizza la sezione multi-stream con un pulsante di apertura stream per ciascun giocatore
+      function renderMulti() {
+        const container = document.getElementById('multiContainer');
+        if (!container) return;
+        container.innerHTML = '';
+        const list = serverData.players || [];
+        list.forEach(p => {
+          const joinMinutes = p.joinMinutes || 0;
+          const playMinutes = p.playMinutes || 0;
+          const health = p.health !== undefined ? p.health : 100;
+          const card = document.createElement('div');
+          card.className = 'player-card';
+          card.innerHTML = `
+            <div class="header">
+              <span class="id">#${p.id}</span>
+              <span class="ping">${p.ping || 0}ms</span>
+            </div>
+            <div class="name">${p.name || ''}</div>
+            <div class="joined">Entrato ${Math.floor(joinMinutes / 60)}h ${joinMinutes % 60}m fa</div>
+            <div class="bar">
+              <div style="width:${health}%;background:${health <= 40 ? '#f7768e' : health <= 70 ? '#e0af68' : '#9ece6a'};"></div>
+            </div>
+            <small>Giocato per ${formatMinutes(playMinutes)}</small>
+            <button style="margin-top:8px;background:#313b66;color:#cdd6f4;border:none;padding:6px 8px;border-radius:6px;cursor:pointer;">Apri stream</button>
+          `;
+          // Gestore per il pulsante Apri stream
+          card.querySelector('button').addEventListener('click', () => {
+            // Integrazione streaming: invia richiesta NUI a Lua per aprire lo stream di questo giocatore
+            fetch(`https://${GetParentResourceName()}/openPlayerStream`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id: p.id, name: p.name })
+            });
+          });
+          container.appendChild(card);
+        });
+      }
+      function renderSearch() {
+        const input = document.getElementById('searchInput');
+        const resultsContainer = document.getElementById('searchResults');
+        if (!input || !resultsContainer) return;
+        const query = input.value.trim().toLowerCase();
+        resultsContainer.innerHTML = '';
+        if (query.length < 2) {
+          resultsContainer.innerHTML = '<p style="color:#7986a8;">Inserisci almeno 2 caratteri per cercare</p>';
+          return;
+        }
+        const matches = (serverData.players || []).filter(p => {
+          const name = (p.name || '').toLowerCase();
+          const lic = (p.license || '').toLowerCase();
+          const idStr = String(p.id || '').toLowerCase();
+          return name.includes(query) || lic.includes(query) || idStr.includes(query);
+        });
+        if (matches.length === 0) {
+          resultsContainer.innerHTML = '<p style="color:#7986a8;">Nessun giocatore trovato</p>';
+          return;
+        }
+        matches.forEach(p => {
+          const bansForPlayer = (serverData.bans || []).filter(b => ((b.player_name || b.player || '').toLowerCase() === (p.name || '').toLowerCase()));
+          const banCount = bansForPlayer.length;
+          const trust = Math.max(0, 100 - banCount * 20);
+          const alt = findAltAccounts(p);
+          // Costruisci card risultato
+          const div = document.createElement('div');
+          div.style.background = '#11152a';
+          div.style.border = '1px solid #1e253f';
+          div.style.borderRadius = '8px';
+          div.style.padding = '12px';
+          div.style.marginBottom = '10px';
+          div.innerHTML = `
+            <strong>${p.name}</strong> <span style="font-size:12px;color:#7986a8;">(ID: ${p.id})</span><br>
+            <span style="font-size:12px;color:#7986a8;">Licenza: ${p.license}</span><br>
+            <div style="margin-top:6px;">
+              <div style="font-size:12px;color:#a6adc8;">Indice affidabilità: ${trust}%</div>
+              <div style="background:#313b66;border-radius:4px;height:6px;overflow:hidden;margin-top:4px;">
+                <div style="width:${trust}%;height:100%;background:${trust >= 70 ? '#9ece6a' : trust >= 40 ? '#e0af68' : '#f7768e'};"></div>
+              </div>
+            </div>
+            <div style="margin-top:6px;font-size:12px;color:#a6adc8;">Bann totali: ${banCount}</div>
+            ${banCount > 0 ? '<div style="margin-top:4px;font-size:12px;color:#a6adc8;"><strong>Storico ban:</strong><ul style="margin-left:16px;margin-top:2px;">' + bansForPlayer.map(b => `<li>${formatDate(b.created_at || b.bannedAt).replace('<br>', ' ')} – ${b.reason}</li>`).join('') + '</ul></div>' : ''}
+            ${alt.length > 0 ? '<div style="margin-top:4px;font-size:12px;color:#a6adc8;"><strong>Possibili alt:</strong> ' + alt.join(', ') + '</div>' : ''}
+          `;
+          resultsContainer.appendChild(div);
+        });
+      }
+
+      // ----------------------
+      // Gestione menu e inizializzazione
+      // ----------------------
+      function initDashboard() {
+        // Attiva navigation
+        document.querySelectorAll('#nav-list li').forEach(function(item) {
+          item.addEventListener('click', function() {
+            document.querySelectorAll('#nav-list li').forEach(li => li.classList.remove('active'));
+            this.classList.add('active');
+            const target = this.getAttribute('data-section');
+            document.querySelectorAll('.section').forEach(sec => {
+              if (sec.id === target) sec.classList.add('active');
+              else sec.classList.remove('active');
+            });
+            // quando cambiamo sezione, potremmo voler ridisegnare alcuni elementi
+            if (target === 'players') renderPlayers();
+            if (target === 'map') renderMap();
+            if (target === 'multi') renderMulti();
+            if (target === 'bans') renderBans();
+            if (target === 'admins') renderAdmins();
+            if (target === 'logs') renderLogs();
+            if (target === 'config') renderConfigCategory(document.querySelector('.config-tabs button.active').getAttribute('data-tab'));
+          });
+        });
+        // Calcola statistiche dashboard e aggiorna le card solo quando arrivano dati
+        const stats = calculatePlayerStats();
+        const dashboardCards = document.querySelectorAll('#dashboard .card');
+        if (dashboardCards.length >= 8) {
+          // Lascia i valori vuoti finché non arrivano dati; saranno aggiornati su messaggio 'show'
+          dashboardCards[4].querySelector('.value').textContent = `${stats.current} / 0`;
+          dashboardCards[5].querySelector('.value').textContent = `0`;
+          dashboardCards[6].querySelector('.value').textContent = `${stats.peak}`;
+          dashboardCards[7].querySelector('.value').textContent = `${stats.average}`;
+        }
+        // Imposta ascoltatori per le sezioni giocatori
+        document.getElementById('playersSearch').addEventListener('input', renderPlayers);
+        document.getElementById('filterNew').addEventListener('change', renderPlayers);
+        document.getElementById('filterRecent').addEventListener('change', renderPlayers);
+        document.getElementById('filterThreat').addEventListener('change', renderPlayers);
+        // Inizializza bans: ascoltatori per ricerca e ordinamento
+        document.getElementById('bansSearch').addEventListener('input', renderBans);
+        document.getElementById('banSort').addEventListener('change', renderBans);
+        document.getElementById('unbanAll').addEventListener('click', function() {
+          if (confirm('Sei sicuro di voler revocare tutti i ban?')) {
+            // Invia richiesta NUI per rimuovere tutti i ban
+            fetch(`https://${GetParentResourceName()}/unbanAll`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({})
+            });
+          }
+        });
+        document.getElementById('banOffline').addEventListener('click', function() {
+          const playerName = prompt('Inserisci il nome del giocatore da bannare offline:');
+          if (!playerName) return;
+          const reason = prompt('Motivo del ban:');
+          // Invia richiesta NUI al server per bannare un giocatore offline
+          fetch(`https://${GetParentResourceName()}/banOffline`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ player: playerName, reason: reason || 'Violazione' })
+          });
+        });
+        // Inizializza admins: ascoltatore per ricerca
+        document.getElementById('adminsSearch').addEventListener('input', renderAdmins);
+        // Inizializza logs: ascoltatori per filtri
+        document.getElementById('logType').addEventListener('change', renderLogs);
+        document.getElementById('logRange').addEventListener('change', renderLogs);
+        document.getElementById('logSearch').addEventListener('input', renderLogs);
+        // Inizializza console: ascoltatore per ricerca, pulizia e download
+        document.getElementById('consoleSearch').addEventListener('input', renderConsole);
+        document.getElementById('consoleClear').addEventListener('click', function() {
+          consoleLogs = [];
+          renderConsole();
+        });
+        document.getElementById('consoleDownload').addEventListener('click', function() {
+          const blob = new Blob([consoleLogs.join('\n')], { type: 'text/plain' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'console_log.txt';
+          a.click();
+          URL.revokeObjectURL(url);
+        });
+        // Inizializza configurazione: gestione tab
+        document.querySelectorAll('.config-tabs button').forEach(btn => {
+          btn.addEventListener('click', function() {
+            document.querySelectorAll('.config-tabs button').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            const cat = this.getAttribute('data-tab');
+            renderConfigCategory(cat);
+          });
+        });
+        // Mostra categoria principale all'avvio
+        renderConfigCategory('main');
+        // Inizializza ricerca: ascoltatore
+        document.getElementById('searchInput').addEventListener('input', renderSearch);
+      }
+      // Avvia inizializzazione quando il DOM è pronto
+      document.addEventListener('DOMContentLoaded', initDashboard);
+
+      // Nasconde l'interfaccia finché non vengono ricevuti dati dal lato client.
+      document.addEventListener('DOMContentLoaded', function() {
+        document.body.style.display = 'none';
       });
-    });
-  </script>
-</body>
+
+      // Aggiorna i valori delle carte del dashboard usando serverData.
+      function updateDashboardCards() {
+        const stats = calculatePlayerStats();
+        const cards = document.querySelectorAll('#dashboard .card');
+        if (cards.length >= 8) {
+          // Giocatori attuali
+          const totalSlots = serverData.slotCount || serverData.maxPlayers || 0;
+          const curr = stats.current;
+          cards[4].querySelector('.value').textContent = `${curr} / ${totalSlots}`;
+          // Giocatori bannati
+          const banCount = serverData.totalBans || (serverData.bans ? (Array.isArray(serverData.bans) ? serverData.bans.length : Object.keys(serverData.bans).length) : 0);
+          cards[5].querySelector('.value').textContent = `${banCount}`;
+          // Picco giocatori
+          cards[6].querySelector('.value').textContent = `${stats.peak}`;
+          // Media giocatori
+          cards[7].querySelector('.value').textContent = `${stats.average}`;
+        }
+      }
+
+      // Gestisce i messaggi provenienti dal client Lua. Mostra o nasconde l'interfaccia e aggiorna i dati.
+      function applyDynamicCards() {
+        const d = serverData;
+        if (d.server) {
+          document.getElementById('cardServerStatus').textContent = d.server.status || 'N/D';
+          document.getElementById('cardServerName').textContent = d.server.name || '';
+          document.getElementById('cardServerIP').textContent = d.server.ip || 'N/D';
+          document.getElementById('cardServerPlayers').textContent = d.server.maxPlayers ? 'Slot' : '';
+          const serverEntry = document.getElementById('serverEntry');
+          if (serverEntry) serverEntry.textContent = d.server.name || 'Server';
+        }
+        if (d.license) {
+          document.getElementById('cardLicenseMasked').textContent = d.license.keyMasked || '••••';
+          document.getElementById('cardLicenseStatus').textContent = d.license.status || '';
+            document.getElementById('cardLicenseDays').textContent = (d.license.daysLeft || 0) + 'g';
+          document.getElementById('cardLicenseExpiry').textContent = d.license.expiry || '';
+        }
+        document.getElementById('cardPlayersNow').textContent = d.playersOnline || (d.players ? d.players.length : 0) || 0;
+        document.getElementById('cardPlayersSlots').textContent = (d.server && d.server.maxPlayers) ? ((d.playersOnline || 0) + ' / ' + d.server.maxPlayers) : '';
+        const totalBans = d.totalBans || (Array.isArray(d.bans) ? d.bans.length : (d.bans ? Object.keys(d.bans).length : 0));
+        document.getElementById('cardPlayersBanned').textContent = totalBans;
+        document.getElementById('cardPlayersPeak').textContent = d.peakPlayers || 0;
+        document.getElementById('cardPlayersAvg').textContent = d.averagePlayers || 0;
+      }
+      window.addEventListener('message', function(event) {
+        const data = event.data;
+        if (!data || !data.type) return;
+        if (data.type === 'show') {
+          // Aggiorna i dati del server
+          if (data.data) {
+            serverData = data.data;
+          }
+          // Mostra l'interfaccia
+          document.body.style.display = 'flex';
+          applyDynamicCards();
+          // Costruisci logs e consoleLogs a partire dalle violazioni e AI
+          logs = [];
+          consoleLogs = [];
+          if (serverData.violations) {
+            serverData.violations.forEach(v => {
+              logs.push({
+                time: v.created_at || v.time || new Date().toISOString(),
+                type: v.violation_type || 'violazione',
+                player: v.player_name || v.player || '-',
+                details: v.description || v.violation_type || '-',
+                member: v.identifier || '-'
+              });
+              const t = new Date(v.created_at || Date.now());
+              const ts = t.toTimeString().substring(0, 8);
+              consoleLogs.push(`[${ts}] VIOLAZIONE - ${v.player_name || '-'}: ${v.violation_type || ''}`);
+            });
+          }
+          if (serverData.aiDetections) {
+            serverData.aiDetections.forEach(d => {
+              logs.push({
+                time: d.created_at || d.time || new Date().toISOString(),
+                type: 'ai_detection',
+                player: d.player_name || '-',
+                details: d.threat_type || d.detection_data || '-',
+                member: d.identifier || '-'
+              });
+              const t = new Date(d.created_at || Date.now());
+              const ts = t.toTimeString().substring(0, 8);
+              consoleLogs.push(`[${ts}] AI - ${d.player_name || '-'}: ${d.threat_type || ''}`);
+            });
+          }
+          // Aggiorna dashboard
+          updateDashboardCards(); // mantiene logica legacy se ancora usata
+          // Ridisegna sezioni
+          renderPlayers();
+          renderBans();
+          renderAdmins();
+          renderLogs();
+          renderConsole();
+          renderSearch();
+          // Configurazione viene ridisegnata in base alla tab selezionata
+          const activeTabBtn = document.querySelector('.config-tabs button.active');
+          if (activeTabBtn) {
+            renderConfigCategory(activeTabBtn.getAttribute('data-tab'));
+          }
+          // Multi stream
+          renderMulti();
+        } else if (data.type === 'hide') {
+          document.body.style.display = 'none';
+        }
+      });
+      // ESC per chiudere
+      document.addEventListener('keydown', function(e){
+        if(e.key === 'Escape'){
+          fetch('https://' + GetParentResourceName() + '/close', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})});
+        }
+      })
+      document.getElementById('closeDashboard').addEventListener('click', function(){
+        fetch('https://' + GetParentResourceName() + '/close', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})});
+      });
+    </script>
+  </body>
 </html>

@@ -76,8 +76,8 @@ local function saveViolations()
 end
 
 -- Load the current players table from disk. Used during resource
--- startup to populate the in‑memory list when restarting the
--- resource mid‑game. If the file does not exist an empty table is
+-- startup to populate the in-memory list when restarting the
+-- resource mid-game. If the file does not exist an empty table is
 -- returned.
 local function loadPlayers()
     local raw = LoadResourceFile(GetCurrentResourceName(), playersPath)
@@ -188,7 +188,7 @@ function ACDB.getViolations()
     return violations
 end
 
--- Update the in‑memory players table and persist it to disk. The
+-- Update the in-memory players table and persist it to disk. The
 -- argument should be a table mapping source IDs to player info
 -- tables. This function is called by the events module when
 -- players connect or disconnect.
@@ -203,12 +203,3 @@ end
 function ACDB.getPlayers()
     return players
 end
-
--- Initialise the module on resource start
-AddEventHandler('onResourceStart', function(resourceName)
-    if resourceName == GetCurrentResourceName() then
-        loadBans()
-        loadViolations()
-        loadPlayers()
-    end
-end)
