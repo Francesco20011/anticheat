@@ -1,6 +1,6 @@
 --[[
     config.lua
-    
+
     This file contains values used by the anti‑cheat on both the client
     and server. Adjust these values to customise detection thresholds
     and behaviour. All values are exposed globally via the `Config`
@@ -33,20 +33,19 @@ Config.AllowedWeapons = {
     'WEAPON_APPISTOL'
 }
 
--- Reasons used when banning players. Feel free to localise or modify
--- the wording here. Keys are matched against violation types sent
--- from the client detectors.
+-- Reasons used when banning players. Localised to Italian.
+-- Keys are matched against violation types sent from the client detectors.
 Config.BanReasons = {
-    GODMODE   = 'Godmode detected',
-    SPEEDHACK = 'Speedhack detected',
-    NOCLIP    = 'Noclip detected',
-    AIMBOT    = 'Aimbot detected',
-    WEAPON    = 'Illegal weapon detected',
-    RESOURCE  = 'Unauthorized resource injection',
-    TRIGGER   = 'Unauthorized trigger detected',
-    EVENT     = 'Unauthorized event detected',
-    VISUAL    = 'Visual modification detected',
-    VEHICLE   = 'Vehicle modification detected'
+    GODMODE   = 'Godmode rilevato',
+    SPEEDHACK = 'Speedhack rilevato',
+    NOCLIP    = 'Noclip rilevato',
+    AIMBOT    = 'Aimbot rilevato',
+    WEAPON    = 'Arma illegale rilevata',
+    RESOURCE  = 'Iniezione di risorsa non autorizzata',
+    TRIGGER   = 'Trigger non autorizzato rilevato',
+    EVENT     = 'Evento non autorizzato rilevato',
+    VISUAL    = 'Modifica visiva rilevata',
+    VEHICLE   = 'Modifica del veicolo rilevata'
 }
 
 -- Discord webhook used to send ban notifications. Leave empty if you

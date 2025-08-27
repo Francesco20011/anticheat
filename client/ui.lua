@@ -32,7 +32,7 @@ RegisterCommand('anticheat_toggleui', function()
         SendNUIMessage({ type = 'hide' })
     end
 end, false)
-RegisterKeyMapping('anticheat_toggleui', 'Öffnet das Anti‑Cheat Dashboard', 'keyboard', 'F9')
+RegisterKeyMapping('anticheat_toggleui', 'Apri la dashboard Anti‑Cheat', 'keyboard', 'F9')
 
 Citizen.CreateThread(function()
     while true do

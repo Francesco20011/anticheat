@@ -26,8 +26,8 @@ AddEventHandler('playerConnecting', function(playerName, setKickReason, deferral
     local identifier = ACDB.getIdentifier(src)
     local banned, reason = ACDB.isBanned(identifier)
     if banned then
-        -- Deny connection with the ban reason
-        deferrals.done(('Du bist gebannt: %s'):format(reason))
+        -- Deny connection with the ban reason (translated to Italian)
+        deferrals.done(('Sei stato bannato: %s'):format(reason))
         CancelEvent()
         return
     end

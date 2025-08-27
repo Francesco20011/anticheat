@@ -47,13 +47,14 @@ local function evaluatePlayer(identifier)
             return
         end
         -- Add an AI violation and ban
-        local reason = 'AI detection: wiederholte Verstöße'
+        local reason = 'Rilevazione AI: infrazioni ripetute'
         ACDB.addViolation(identifier, reason)
         ACDB.addBan(identifier, reason)
         if src then
-            DropPlayer(src, ('You have been banned: %s'):format(reason))
+            -- Use Italian message for the drop
+            DropPlayer(src, ('Sei stato bannato: %s'):format(reason))
         end
-        print(('[AC AI] Player %s banned due to repeated violations'):format(identifier))
+        print(('[AC AI] Giocatore %s bannato per violazioni ripetute'):format(identifier))
         -- reset count after banning
         violationCounts[identifier] = 0
     end
@@ -64,9 +65,9 @@ end
 -- patterns into an ML model. For now this function only prints
 -- debug information.
 function ACAI.processPlayerData(identifier, data)
-    print(('[AC AI] Processing data for %s'):format(identifier))
+    print(('[AC AI] Elaborazione dati per %s'):format(identifier))
     -- Example: if data flags suspicious activity, you could call
-    -- ACDB.addViolation(identifier, 'AI detection: suspicious pattern')
+    -- ACDB.addViolation(identifier, 'Rilevazione AI: pattern sospetto')
 end
 
 -- Listen for new violations reported by the ban manager. Each time

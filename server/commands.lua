@@ -23,23 +23,23 @@ local function sendMessage(src, msg)
     end
 end
 
--- Command: ac_unban <identifier>
+-- Command: ac_unban
 -- Removes a ban entry by identifier. Only players with the
 -- "anticheat.unban" ACE permission or the server console can run this.
 RegisterCommand('ac_unban', function(src, args)
     if src ~= 0 and not IsPlayerAceAllowed(src, 'anticheat.unban') then
-        sendMessage(src, 'Du hast keine Berechtigung, diesen Befehl zu verwenden.')
+        sendMessage(src, 'Non hai il permesso di usare questo comando.')
         return
     end
     local identifier = args[1]
     if not identifier then
-        sendMessage(src, 'Verwendung: /ac_unban <identifier>')
+        sendMessage(src, 'Uso: /ac_unban <identificatore>')
         return
     end
     if ACDB.removeBan(identifier) then
-        sendMessage(src, ('Spieler %s wurde entbannt.'):format(identifier))
+        sendMessage(src, ('Giocatore %s è stato sbannato.'):format(identifier))
     else
-        sendMessage(src, ('Es existiert kein Bann für %s.'):format(identifier))
+        sendMessage(src, ('Non esiste nessun ban per %s.'):format(identifier))
     end
 end, true)
 
@@ -49,7 +49,7 @@ end, true)
 -- encoded for easy reading.
 RegisterCommand('ac_bans', function(src)
     if src ~= 0 and not IsPlayerAceAllowed(src, 'anticheat.view') then
-        sendMessage(src, 'Du hast keine Berechtigung, diesen Befehl zu verwenden.')
+        sendMessage(src, 'Non hai il permesso di usare questo comando.')
         return
     end
     local bans = ACDB.getBans()
@@ -62,7 +62,7 @@ end, true)
 -- anti‑cheat. Useful for debugging.
 RegisterCommand('ac_players', function(src)
     if src ~= 0 and not IsPlayerAceAllowed(src, 'anticheat.view') then
-        sendMessage(src, 'Du hast keine Berechtigung, diesen Befehl zu verwenden.')
+        sendMessage(src, 'Non hai il permesso di usare questo comando.')
         return
     end
     local players = ACDB.getPlayers()

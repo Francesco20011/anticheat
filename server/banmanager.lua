@@ -37,7 +37,8 @@ local function dropAndBan(src, identifier, reason)
     if Config.DiscordWebhook and Config.DiscordWebhook ~= '' then
         ACDiscord.sendBanNotification(name, identifier, reason)
     end
-    DropPlayer(src, ('You have been banned: %s'):format(reason))
+    -- Drop the player with an Italian message
+    DropPlayer(src, ('Sei stato bannato: %s'):format(reason))
 end
 
 -- Handle reports from the client. `data` should contain at least
@@ -47,7 +48,7 @@ RegisterNetEvent('anticheat:reportViolation')
 AddEventHandler('anticheat:reportViolation', function(data)
     local src = source
     if type(data) ~= 'table' or not data.type then return end
-    local reason = Config.BanReasons[data.type] or ('Unknown violation: ' .. tostring(data.type))
+    local reason = Config.BanReasons[data.type] or ('Violazione sconosciuta: ' .. tostring(data.type))
     local identifier = ACDB.getIdentifier(src)
     -- Increment violation count for this player
     violationCount[identifier] = (violationCount[identifier] or 0) + 1

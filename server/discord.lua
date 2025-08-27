@@ -18,13 +18,14 @@ function ACDiscord.sendBanNotification(playerName, identifier, reason)
     if not url or url == '' then return end
     local embed = {
         {
-            title = 'Player Banned',
+            -- Title translated to Italian
+            title = 'Giocatore bannato',
             color = 15158332, -- red
             fields = {
-                {name = 'Player', value = playerName or 'Unknown', inline = true},
-                {name = 'Identifier', value = identifier or 'Unknown', inline = false},
-                {name = 'Reason', value = reason or 'No reason provided', inline = false},
-                {name = 'Time', value = os.date('%Y-%m-%d %H:%M:%S'), inline = false}
+                {name = 'Giocatore', value = playerName or 'Sconosciuto', inline = true},
+                {name = 'Identificatore', value = identifier or 'Sconosciuto', inline = false},
+                {name = 'Motivo', value = reason or 'Nessun motivo fornito', inline = false},
+                {name = 'Data', value = os.date('%Y-%m-%d %H:%M:%S'), inline = false}
             }
         }
     }

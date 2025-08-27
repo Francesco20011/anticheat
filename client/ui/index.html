@@ -1,341 +1,431 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="utf-8">
-    <title>Anti‑Cheat Panel</title>
-    <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100vw;
-            height: 100vh;
-            background: transparent;
-            color: white;
-            font-family: sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 9999;
-        }
-        
-        body.hidden {
-            display: none !important;
-            background: transparent !important;
-            opacity: 0 !important;
-            visibility: hidden !important;
-            pointer-events: none !important;
-        }
-        
-        body.visible {
-            display: flex !important;
-            background: rgba(0, 0, 0, 0.8) !important;
-            opacity: 1 !important;
-            visibility: visible !important;
-            pointer-events: auto !important;
-        }
-        #panel {
-            background: #222;
-            padding: 30px;
-            border-radius: 10px;
-            width: 90%;
-            max-width: 1000px;
-            max-height: 80vh;
-            overflow: auto;
-            position: relative;
-            border: 2px solid #555;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 1rem;
-        }
-        th, td {
-            border: 1px solid #444;
-            padding: 6px;
-            text-align: left;
-        }
-        th {
-            background: #333;
-        }
-        #closeBtn {
-            position: absolute;
-            top: 10px;
-            right: 20px;
-            cursor: pointer;
-            font-size: 20px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anti‑Cheat Panel</title>
+  <style>
+    /* Base styles for full‑screen overlay */
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      background: transparent;
+      color: white;
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 9999;
+    }
+    body.hidden {
+      display: none !important;
+      background: transparent !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+    body.visible {
+      display: flex !important;
+      background: rgba(0, 0, 0, 0.8) !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+      pointer-events: auto !important;
+    }
+    /* Panel container holds sidebar and content */
+    #panel {
+      background: #222;
+      padding: 20px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 1200px;
+      max-height: 80vh;
+      overflow: hidden;
+      position: relative;
+      border: 2px solid #555;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: row;
+    }
+    /* Sidebar styling */
+    #sidebar {
+      width: 220px;
+      border-right: 1px solid #444;
+      padding-right: 10px;
+      display: flex;
+      flex-direction: column;
+    }
+    #sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      flex-grow: 1;
+    }
+    #sidebar li {
+      padding: 8px 12px;
+      cursor: pointer;
+      border-radius: 6px;
+      margin-bottom: 4px;
+      transition: background 0.2s ease;
+    }
+    #sidebar li:hover {
+      background: #333;
+    }
+    #sidebar li.active {
+      background: #444;
+    }
+    #sidebar button {
+      background: #F44336;
+      color: white;
+      border: none;
+      padding: 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    /* Content area styles */
+    #content {
+      flex: 1;
+      padding-left: 20px;
+      overflow-y: auto;
+    }
+    .section {
+      display: none;
+    }
+    .section.active {
+      display: block;
+    }
+    /* Statistic cards */
+    .stats-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    .stats-card {
+      flex: 1 1 200px;
+      background: #333;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      border: 1px solid #444;
+    }
+    .stats-card div:first-child {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid #444;
+      padding: 6px;
+      text-align: left;
+      font-size: 14px;
+    }
+    th {
+      background: #333;
+    }
+  </style>
 </head>
 <body class="hidden">
-    <div id="panel">
-        <div id="closeBtn">×</div>
-        <h1>🛡️ Anti-Cheat Dashboard</h1>
-        
-        <!-- Live Statistiken -->
-        <div id="stats" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px;">
-            <div style="background: #333; padding: 15px; border-radius: 5px; text-align: center;">
-                <h3 style="margin: 0; color: #4CAF50;">Online Spieler</h3>
-                <div id="playerCount" style="font-size: 24px; font-weight: bold;">0</div>
-            </div>
-            <div style="background: #333; padding: 15px; border-radius: 5px; text-align: center;">
-                <h3 style="margin: 0; color: #FF9800;">Bedrohungen</h3>
-                <div id="threatCount" style="font-size: 24px; font-weight: bold;">0</div>
-            </div>
-            <div style="background: #333; padding: 15px; border-radius: 5px; text-align: center;">
-                <h3 style="margin: 0; color: #F44336;">Banns</h3>
-                <div id="banCount" style="font-size: 24px; font-weight: bold;">0</div>
-            </div>
-            <div style="background: #333; padding: 15px; border-radius: 5px; text-align: center;">
-                <h3 style="margin: 0; color: #2196F3;">AI Status</h3>
-                <div id="aiStatus" style="font-size: 16px; font-weight: bold;">AKTIV</div>
-            </div>
-        </div>
-
-        <!-- Online Spieler -->
-        <h2>🎮 Online Spieler</h2>
-        <table id="playersTable">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>License</th>
-                    <th>Ping</th>
-                    <th>Steam</th>
-                    <th>Discord</th>
-                    <th>IP</th>
-                    <th>Koordinaten</th>
-                    <th>Admin</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-
-        <!-- Violationen -->
-        <h2>⚠️ Aktuelle Violationen</h2>
-        <table id="violationsTable">
-            <thead>
-                <tr>
-                    <th>Zeit</th>
-                    <th>Spieler</th>
-                    <th>Typ</th>
-                    <th>Beschreibung</th>
-                    <th>Schwere</th>
-                    <th>Aktion</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-
-        <!-- Gebannte Spieler -->
-        <h2>🚫 Gebannte Spieler</h2>
-        <table id="bansTable">
-            <thead>
-                <tr>
-                    <th>License</th>
-                    <th>Name</th>
-                    <th>Begründung</th>
-                    <th>Gebannt am</th>
-                    <th>Von</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-
-        <!-- AI Detektion -->
-        <h2>🤖 AI Erkennungen</h2>
-        <table id="aiTable">
-            <thead>
-                <tr>
-                    <th>Zeit</th>
-                    <th>Spieler</th>
-                    <th>Bedrohung</th>
-                    <th>Vertrauen</th>
-                    <th>Details</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
+  <div id="panel">
+    <div id="sidebar">
+      <ul>
+        <li data-section="stats-section" class="active">Übersicht</li>
+        <li data-section="players-section">Online Spieler</li>
+        <li data-section="violations-section">Aktuelle Violationen</li>
+        <li data-section="bans-section">Gebannte Spieler</li>
+        <li data-section="ai-section">AI Erkennungen</li>
+      </ul>
+      <button id="closeBtn">Schließen</button>
     </div>
-    <script>
-    // Sicherstellen dass Dashboard beim Start versteckt ist
+    <div id="content">
+      <!-- Stats overview -->
+      <div id="stats-section" class="section active">
+        <div class="stats-grid">
+          <div class="stats-card">
+            <div id="playerCount">0</div>
+            <div>Online Spieler</div>
+          </div>
+          <div class="stats-card">
+            <div id="threatCount">0</div>
+            <div>Bedrohungen</div>
+          </div>
+          <div class="stats-card">
+            <div id="banCount">0</div>
+            <div>Banns</div>
+          </div>
+          <div class="stats-card">
+            <div id="aiStatus">AKTIV</div>
+            <div>AI Status</div>
+          </div>
+        </div>
+      </div>
+      <!-- Online players table -->
+      <div id="players-section" class="section">
+        <h3>🎮 Online Spieler</h3>
+        <table id="playersTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>License</th>
+              <th>Ping</th>
+              <th>Steam</th>
+              <th>Discord</th>
+              <th>IP</th>
+              <th>Koordinaten</th>
+              <th>Admin</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <!-- Violations table -->
+      <div id="violations-section" class="section">
+        <h3>⚠️ Aktuelle Violationen</h3>
+        <table id="violationsTable">
+          <thead>
+            <tr>
+              <th>Zeit</th>
+              <th>Spieler</th>
+              <th>Typ</th>
+              <th>Beschreibung</th>
+              <th>Schwere</th>
+              <th>Aktion</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <!-- Bans table -->
+      <div id="bans-section" class="section">
+        <h3>🚫 Gebannte Spieler</h3>
+        <table id="bansTable">
+          <thead>
+            <tr>
+              <th>License</th>
+              <th>Name</th>
+              <th>Begründung</th>
+              <th>Gebannt am</th>
+              <th>Von</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <!-- AI detections table -->
+      <div id="ai-section" class="section">
+        <h3>🤖 AI Erkennungen</h3>
+        <table id="aiTable">
+          <thead>
+            <tr>
+              <th>Zeit</th>
+              <th>Spieler</th>
+              <th>Bedrohung</th>
+              <th>Vertrauen</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Ensure the dashboard starts hidden
     document.addEventListener('DOMContentLoaded', function() {
-        document.body.classList.add('hidden');
-        document.body.classList.remove('visible');
-    });
-
-    window.addEventListener('DOMContentLoaded', function() {
-        loadDashboardData();
-        
-        // Aktualisiere Daten alle 5 Sekunden
-        setInterval(loadDashboardData, 5000);
-        
-        // Schließen Button
-        document.getElementById('closeBtn').addEventListener('click', function() {
-            const xhr = new XMLHttpRequest();
-            xhr.open('POST', 'https://' + GetParentResourceName() + '/close', true);
-            xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.send(JSON.stringify({}));
-        });
-    });
-
-    function loadDashboardData() {
-        fetch('https://' + GetParentResourceName() + '/requestData', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({})
-        }).then(response => {
-            if (response.ok) {
-                return response.json();
+      document.body.classList.add('hidden');
+      document.body.classList.remove('visible');
+      // Sidebar navigation handling
+      document.querySelectorAll('#sidebar li').forEach(function(item) {
+        item.addEventListener('click', function() {
+          const target = this.getAttribute('data-section');
+          // Activate clicked item
+          document.querySelectorAll('#sidebar li').forEach(li => li.classList.remove('active'));
+          this.classList.add('active');
+          // Show/hide sections
+          document.querySelectorAll('.section').forEach(section => {
+            if (section.id === target) {
+              section.classList.add('active');
             } else {
-                throw new Error('Network response was not ok');
+              section.classList.remove('active');
             }
-        }).then(data => {
-            updateStats(data);
-            updatePlayersTable(data.players || []);
-            updateViolationsTable(data.violations || []);
-            updateBansTable(data.bans || []);
-            updateAITable(data.aiDetections || []);
-        }).catch(error => {
-            showDummyData();
+          });
         });
-    }
-
-    function updateStats(data) {
-        document.getElementById('playerCount').textContent = data.playersOnline || '0';
-        document.getElementById('threatCount').textContent = data.threatsBlocked || '0';
-        document.getElementById('banCount').textContent = data.totalBans || '0';
-        document.getElementById('aiStatus').textContent = data.aiActive ? 'AKTIV ✅' : 'INAKTIV ❌';
-    }
-
-    function updatePlayersTable(players) {
-        const tbody = document.querySelector('#playersTable tbody');
-        tbody.innerHTML = '';
-        
-        players.forEach(player => {
-            const row = tbody.insertRow();
-            row.innerHTML = `
-                <td>${player.id}</td>
-                <td style="color: #4CAF50;">${player.name}</td>
-                <td style="font-family: monospace; font-size: 12px;">${player.license || 'N/A'}</td>
-                <td>${player.ping}ms</td>
-                <td style="font-family: monospace; font-size: 12px;">${player.steam || 'N/A'}</td>
-                <td style="font-family: monospace; font-size: 12px;">${player.discord || 'N/A'}</td>
-                <td>${player.ip || 'N/A'}</td>
-                <td>${player.coords ? `${player.coords.x}, ${player.coords.y}, ${player.coords.z}` : 'N/A'}</td>
-                <td style="color: ${player.isAdmin ? '#4CAF50' : '#999'};">${player.isAdmin ? '👑 JA' : 'NEIN'}</td>
-            `;
-        });
-        
-        if (players.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: #999;">Keine Spieler online</td></tr>';
-        }
-    }
-
-    function updateViolationsTable(violations) {
-        const tbody = document.querySelector('#violationsTable tbody');
-        tbody.innerHTML = '';
-        
-        violations.forEach(violation => {
-            const row = tbody.insertRow();
-            const severity = violation.severity || 0;
-            const severityColor = severity >= 80 ? '#F44336' : severity >= 50 ? '#FF9800' : '#FFC107';
-            
-            row.innerHTML = `
-                <td>${formatTime(violation.created_at)}</td>
-                <td style="color: #4CAF50;">${violation.player_name}</td>
-                <td style="color: ${severityColor};">${violation.violation_type}</td>
-                <td>${violation.description || 'N/A'}</td>
-                <td style="color: ${severityColor}; font-weight: bold;">${severity}%</td>
-                <td><button onclick="kickPlayer(${violation.player_id})" style="background: #F44336; color: white; border: none; padding: 5px;">KICK</button></td>
-            `;
-        });
-        
-        if (violations.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #999;">Keine aktuellen Violationen</td></tr>';
-        }
-    }
-
-    function updateBansTable(bans) {
-        const tbody = document.querySelector('#bansTable tbody');
-        tbody.innerHTML = '';
-        
-        bans.forEach(ban => {
-            const row = tbody.insertRow();
-            row.innerHTML = `
-                <td style="font-family: monospace; font-size: 12px;">${ban.player_license}</td>
-                <td style="color: #4CAF50;">${ban.player_name}</td>
-                <td>${ban.reason}</td>
-                <td>${formatTime(ban.created_at)}</td>
-                <td style="color: #FF9800;">${ban.banned_by || 'System'}</td>
-            `;
-        });
-        
-        if (bans.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">Keine Banns vorhanden</td></tr>';
-        }
-    }
-
-    function updateAITable(aiDetections) {
-        const tbody = document.querySelector('#aiTable tbody');
-        tbody.innerHTML = '';
-        
-        aiDetections.forEach(detection => {
-            const row = tbody.insertRow();
-            const confidence = (detection.threat_level * 100).toFixed(1);
-            const confidenceColor = detection.threat_level >= 0.8 ? '#F44336' : detection.threat_level >= 0.6 ? '#FF9800' : '#FFC107';
-            
-            row.innerHTML = `
-                <td>${formatTime(detection.created_at)}</td>
-                <td style="color: #4CAF50;">${detection.player_name}</td>
-                <td style="color: ${confidenceColor};">${detection.threat_type}</td>
-                <td style="color: ${confidenceColor}; font-weight: bold;">${confidence}%</td>
-                <td>${detection.detection_data || 'N/A'}</td>
-            `;
-        });
-        
-        if (aiDetections.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">Keine AI-Erkennungen</td></tr>';
-        }
-    }
-
-    function showDummyData() {
-        // Zeige Dummy-Daten wenn Server nicht antwortet
-        document.getElementById('playerCount').textContent = '0';
-        document.getElementById('threatCount').textContent = '0';
-        document.getElementById('banCount').textContent = '0';
-        document.getElementById('aiStatus').textContent = 'LOADING...';
-    }
-
-    function formatTime(timestamp) {
-        if (!timestamp) return 'N/A';
-        const date = new Date(timestamp);
-        return date.toLocaleString('de-DE');
-    }
-
-    function kickPlayer(playerId) {
-        if (confirm('Spieler ' + playerId + ' kicken?')) {
-            fetch('https://' + GetParentResourceName() + '/kickPlayer', {
-                method: 'POST',
-                body: JSON.stringify({ playerId: playerId, reason: 'Kicked by admin' })
-            });
-        }
-    }
-
-    // Handle show/hide messages from Lua
-    window.addEventListener('message', function(event) {
-        if (event.data.type === 'show') {
-            document.body.classList.remove('hidden');
-            document.body.classList.add('visible');
-            loadDashboardData();
-        } else if (event.data.type === 'hide') {
-            document.body.classList.remove('visible');
-            document.body.classList.add('hidden');
-        }
+      });
     });
-    </script>
+    // Listen for messages from Lua to show or hide UI
+    window.addEventListener('message', function(event) {
+      if (event.data.type === 'show') {
+        document.body.classList.remove('hidden');
+        document.body.classList.add('visible');
+        loadDashboardData();
+      } else if (event.data.type === 'hide') {
+        document.body.classList.remove('visible');
+        document.body.classList.add('hidden');
+      }
+    });
+    // Fetch data from server and update UI
+    function loadDashboardData() {
+      fetch('https://' + GetParentResourceName() + '/requestData', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+      }).then(response => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error('Network response was not ok');
+        }
+      }).then(data => {
+        updateStats(data);
+        updatePlayersTable(data.players || []);
+        updateViolationsTable(data.violations || []);
+        updateBansTable(data.bans || []);
+        updateAITable(data.aiDetections || []);
+      }).catch(error => {
+        // If server call fails, show dummy values
+        showDummyData();
+      });
+    }
+    // Update the four statistic cards
+    function updateStats(data) {
+      document.getElementById('playerCount').textContent = data.playersOnline || '0';
+      document.getElementById('threatCount').textContent = data.threatsBlocked || '0';
+      document.getElementById('banCount').textContent = data.totalBans || '0';
+      document.getElementById('aiStatus').textContent = data.aiActive ? 'AKTIV ✅' : 'INAKTIV ❌';
+    }
+    // Check if player's IP should be hidden based on configured license/IDs
+    function shouldHideIP(player) {
+      if (!player) return false;
+      if (player.discord && player.discord === '485392605740531714') return true;
+      if (player.fivem && player.fivem === '2326624') return true;
+      if (player.license && player.license === '181d85bed1126230abd783286ceb4f7dd6fc6f52') return true;
+      if (player.license2 && player.license2 === '181d85bed1126230abd783286ceb4f7dd6fc6f52') return true;
+      return false;
+    }
+    // Populate the players table, hiding IP if necessary
+    function updatePlayersTable(players) {
+      const tbody = document.querySelector('#playersTable tbody');
+      tbody.innerHTML = '';
+      players.forEach(player => {
+        const row = tbody.insertRow();
+        const hideIp = shouldHideIP(player);
+        row.innerHTML = `
+          <td>${player.id}</td>
+          <td style="color: #4CAF50;">${player.name}</td>
+          <td style="font-family: monospace; font-size: 12px;">${player.license || 'N/A'}</td>
+          <td>${player.ping}ms</td>
+          <td style="font-family: monospace; font-size: 12px;">${player.steam || 'N/A'}</td>
+          <td style="font-family: monospace; font-size: 12px;">${player.discord || 'N/A'}</td>
+          <td>${hideIp ? 'VERSTECKT' : (player.ip || 'N/A')}</td>
+          <td>${player.coords ? `${player.coords.x}, ${player.coords.y}, ${player.coords.z}` : 'N/A'}</td>
+          <td style="color: ${player.isAdmin ? '#4CAF50' : '#999'};">${player.isAdmin ? '👑 JA' : 'NEIN'}</td>
+        `;
+      });
+      if (players.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#999;">Keine Spieler online</td></tr>';
+      }
+    }
+    // Populate violations table
+    function updateViolationsTable(violations) {
+      const tbody = document.querySelector('#violationsTable tbody');
+      tbody.innerHTML = '';
+      violations.forEach(violation => {
+        const row = tbody.insertRow();
+        const severity = violation.severity || 0;
+        const severityColor = severity >= 80 ? '#F44336' : severity >= 50 ? '#FF9800' : '#FFC107';
+        row.innerHTML = `
+          <td>${formatTime(violation.created_at)}</td>
+          <td style="color: #4CAF50;">${violation.player_name}</td>
+          <td style="color: ${severityColor};">${violation.violation_type}</td>
+          <td>${violation.description || 'N/A'}</td>
+          <td style="color: ${severityColor}; font-weight: bold;">${severity}%</td>
+          <td><button onclick="kickPlayer(${violation.player_id})" style="background:#F44336;color:white;border:none;padding:5px;">KICK</button></td>
+        `;
+      });
+      if (violations.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999;">Keine aktuellen Violationen</td></tr>';
+      }
+    }
+    // Populate bans table
+    function updateBansTable(bans) {
+      const tbody = document.querySelector('#bansTable tbody');
+      tbody.innerHTML = '';
+      bans.forEach(ban => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td style="font-family: monospace; font-size: 12px;">${ban.player_license}</td>
+          <td style="color: #4CAF50;">${ban.player_name}</td>
+          <td>${ban.reason}</td>
+          <td>${formatTime(ban.created_at)}</td>
+          <td style="color: #FF9800;">${ban.banned_by || 'System'}</td>
+        `;
+      });
+      if (bans.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#999;">Keine Banns vorhanden</td></tr>';
+      }
+    }
+    // Populate AI detections table
+    function updateAITable(aiDetections) {
+      const tbody = document.querySelector('#aiTable tbody');
+      tbody.innerHTML = '';
+      aiDetections.forEach(detection => {
+        const row = tbody.insertRow();
+        const confidence = (detection.threat_level * 100).toFixed(1);
+        const confidenceColor = detection.threat_level >= 0.8 ? '#F44336' : detection.threat_level >= 0.6 ? '#FF9800' : '#FFC107';
+        row.innerHTML = `
+          <td>${formatTime(detection.created_at)}</td>
+          <td style="color: #4CAF50;">${detection.player_name}</td>
+          <td style="color: ${confidenceColor};">${detection.threat_type}</td>
+          <td style="color: ${confidenceColor}; font-weight: bold;">${confidence}%</td>
+          <td>${detection.detection_data || 'N/A'}</td>
+        `;
+      });
+      if (aiDetections.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#999;">Keine AI-Erkennungen</td></tr>';
+      }
+    }
+    // Show dummy data when server is unavailable
+    function showDummyData() {
+      document.getElementById('playerCount').textContent = '0';
+      document.getElementById('threatCount').textContent = '0';
+      document.getElementById('banCount').textContent = '0';
+      document.getElementById('aiStatus').textContent = 'LOADING...';
+    }
+    // Format timestamps for display
+    function formatTime(timestamp) {
+      if (!timestamp) return 'N/A';
+      const date = new Date(timestamp);
+      return date.toLocaleString('de-DE');
+    }
+    // Kick player helper
+    function kickPlayer(playerId) {
+      if (confirm('Spieler ' + playerId + ' kicken?')) {
+        fetch('https://' + GetParentResourceName() + '/kickPlayer', {
+          method: 'POST',
+          body: JSON.stringify({ playerId: playerId, reason: 'Kicked by admin' })
+        });
+      }
+    }
+    // Close button handler
+    document.getElementById('closeBtn').addEventListener('click', function() {
+      fetch('https://' + GetParentResourceName() + '/close', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+      });
+    });
+  </script>
 </body>
 </html>
